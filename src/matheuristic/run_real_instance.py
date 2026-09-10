@@ -18,10 +18,10 @@ real scale tractable, one geographic neighborhood at a time.
 
 Same two caveats as run_instance.py, not resolved here either:
 
-1. budget/cvar_alpha/mean_risk_weight/window are the user's own call
-   (CLAUDE.md section 4/10). --illustrative-smoke-test must be passed
-   explicitly to acknowledge a given run is not using sourced/decided
-   values.
+1. UPDATE 2026-09-09: budget/cvar_alpha/mean_risk_weight/window are now
+   DECIDED (CLAUDE.md section 10) and default to those values here.
+   --illustrative-smoke-test now acknowledges the five swept sensitivity
+   parameters being fixed at one sweep point instead.
 2. --n-bases-per-neighborhood/--n-water-per-neighborhood/--max-iterations are
    this script's own tractability/runtime knobs, not a proposed real
    experimental design; they are not sourced or tuned against real solve
@@ -95,15 +95,29 @@ def main() -> None:
         required=True,
         help="Uniform cost_water[k] sweep point, COP, see src/model/costs.py's documented range.",
     )
-    parser.add_argument("--budget", type=float, required=True, help="B, COP. The user's own call.")
-    parser.add_argument("--cvar-alpha", type=float, required=True, help="alpha. The user's own call.")
-    parser.add_argument("--mean-risk-weight", type=float, required=True, help="lambda. The user's own call.")
-    parser.add_argument("--window", type=float, required=True, help="W, hours. The user's own call.")
+    parser.add_argument(
+        "--budget", type=float, default=150_000_000_000.0,
+        help="B, COP. DECIDED 2026-09-09 (CLAUDE.md section 10): the real FAC/UNGRD Firehawk program "
+        "spend; experiment 6 sweeps it.",
+    )
+    parser.add_argument(
+        "--cvar-alpha", type=float, default=0.95,
+        help="alpha. DECIDED 2026-09-09: standard academic CVaR level (Rockafellar-Uryasev 2000).",
+    )
+    parser.add_argument(
+        "--mean-risk-weight", type=float, default=0.5,
+        help="lambda. DECIDED 2026-09-09: disclosed midpoint convention; experiment 4 sweeps it.",
+    )
+    parser.add_argument(
+        "--window", type=float, default=2.0,
+        help="W, hours. DECIDED 2026-09-09: NWCG PMS 205 initial-attack containment standard.",
+    )
     parser.add_argument(
         "--illustrative-smoke-test",
         action="store_true",
-        help="Required flag: acknowledges budget/cvar-alpha/mean-risk-weight/window are not sourced/decided "
-        "values for this run, only a smoke test of the pipeline plumbing and matheuristic runtime.",
+        help="Required flag: acknowledges ros-scale/initial-fire-area/liters-per-sqm/cost-base/"
+        "cost-water are swept sensitivity parameters (CLAUDE.md section 3/9) fixed at one sweep point "
+        "for this run, and that the matheuristic's neighborhood knobs are not yet tuned.",
     )
     parser.add_argument("--solver", choices=["cbc", "gurobi"], default="cbc")
     parser.add_argument("--n-bases-per-neighborhood", type=int, default=5)
@@ -126,9 +140,10 @@ def main() -> None:
 
     if not args.illustrative_smoke_test:
         parser.error(
-            "budget/cvar-alpha/mean-risk-weight/window are the user's own call (CLAUDE.md section 4/10), "
-            "not to be treated as defaults. Pass --illustrative-smoke-test to acknowledge this run is a "
-            "pipeline smoke test only, not a real experiment."
+            "ros-scale/initial-fire-area/liters-per-sqm/cost-base/cost-water are swept sensitivity "
+            "parameters (CLAUDE.md section 3/9, experiment 6); a single run fixes them at one sweep "
+            "point. Pass --illustrative-smoke-test to acknowledge that. budget/cvar-alpha/"
+            "mean-risk-weight/window have DECIDED defaults (2026-09-09, CLAUDE.md section 10)."
         )
 
     bases = pd.read_csv(args.bases)

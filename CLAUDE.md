@@ -163,13 +163,13 @@ explicit, disclosed conversion.
 
 | Symbol | Code identifier | Meaning |
 |---|---|---|
-| B | `budget` | total first-stage budget, COP |
+| B | `budget` | total first-stage budget, COP; DECIDED 2026-09-09: 150,000,000,000 COP base case, anchored on the real FAC/UNGRD Firehawk program spend (section 8/10); still swept in experiment 6 by design |
 | c_base_i | `cost_base[i]` | fixed cost to open base i, COP; no per-site source exists, swept sensitivity parameter (uniform across bases) DECIDED 2026-08-30, see section 3/8/10 and src/model/costs.py |
 | c_air_m | `cost_aircraft[m]` | cost to acquire one aircraft of type m, COP; real value sourced 2026-08-30, see section 8/10 |
 | c_water_k | `cost_water[k]` | fixed cost to enable water point k, COP; no per-site source exists, swept sensitivity parameter (uniform across water points) DECIDED 2026-08-30, see section 3/8/10 and src/model/costs.py |
 | Q_m | `tank[m]` | water tank capacity of type m (liters per drop); real value sourced 2026-08-30, see section 8/10 |
 | speed_m | `speed[m]` | flight speed of type m, meters per hour; real value sourced 2026-08-30, see section 8/10 |
-| W | `window` | critical suppression window length |
+| W | `window` | critical suppression window length, hours; DECIDED 2026-09-09: 2.0 h base case (NWCG PMS 205 initial-attack containment standard, section 10), robustness sweep {1,2,4,8} folded into experiment 6 |
 | delta | `ops_time` | per-cycle operational overhead (fill plus drop) |
 | tau_bf_if | `t_base_fire[i,f]` | one-way base-to-fire travel time |
 | tau_fw_fk | `t_fire_water[f,k]` | one-way fire-to-water travel time |
@@ -179,8 +179,8 @@ explicit, disclosed conversion.
 | A0 | `initial_fire_area` | global constant, initial fire area at detection for the requirement[f] exponential; not fixed, swept over roughly 1-30 ha in the section 9 experiment 6 sensitivity sweep, see section 3 |
 | c | `liters_per_sqm` | global constant, liters per square meter to control a fire, for requirement[f]; not fixed, swept over roughly 1.5-10 L/m^2 in the section 9 experiment 6 sensitivity sweep, see section 3 |
 | -- | `ros_scale` | global constant, overall magnitude of ros[f]; not fixed, third parameter swept in the section 9 experiment 6 sensitivity sweep, see section 5.3 |
-| alpha | `cvar_alpha` | CVaR confidence level (e.g. 0.95) |
-| lambda | `mean_risk_weight` | mean-risk weight (0 risk neutral, 1 pure CVaR) |
+| alpha | `cvar_alpha` | CVaR confidence level; DECIDED 2026-09-09: 0.95 (the standard academic choice, used in Rockafellar and Uryasev 2000's own examples, section 10) |
+| lambda | `mean_risk_weight` | mean-risk weight (0 risk neutral, 1 pure CVaR); DECIDED 2026-09-09: 0.5 base case, a disclosed midpoint convention (lambda is a decision-maker preference parameter by construction, no source can fix it), swept by experiment 4's own design |
 
 ### Derived quantities
 
@@ -735,7 +735,11 @@ layer before redistributing derivatives, and cite year, scale and holder.
    million-6,000 million COP per base and 15 million-300 million COP per
    water point, section 3/8/10, src/model/costs.py). "Sensitivity to
    propagation rates" (the original wording of this item) is now this
-   ros_scale sweep specifically, not a separate item.
+   ros_scale sweep specifically, not a separate item. Extended 2026-09-09:
+   a window robustness sweep over {1, 2, 4, 8} hours is folded in here too,
+   since the window's own evidence base (section 10, NWCG initial-attack
+   containment standard vs other agencies' 24-hour control standards) spans
+   agencies rather than fixing one universal number.
 
 ---
 
@@ -985,6 +989,63 @@ not to be silently resolved:
   above.
 
 ---
+
+- budget/cvar_alpha/mean_risk_weight/window: DECIDED 2026-09-09. The user
+  explicitly delegated these four (previously "the user's own call"
+  throughout this section) to be resolved on evidence from reliable
+  sources; every earlier entry above saying they remain the user's call is
+  superseded by this one. Values and provenance, config/parameters.yaml
+  updated to match:
+  1. window = 2.0 hours. Anchor: NWCG's official interagency glossary
+     (PMS 205, "Initial Attack Fire", nwcg.gov, verified 2026-09-09): an
+     initial attack fire is "generally contained by the attack units first
+     dispatched, without a significant augmentation of reinforcements,
+     within two hours after initial attack, and full control is expected
+     within the first burning period." Disclosed nuance: NWCG's two hours
+     run from the start of the attack, while this model's window includes
+     the base-to-fire positioning leg (drops = floor((window -
+     t_base_fire)/cycle_time)), so W = 2 h is slightly tighter than the
+     NWCG reading. Agency standards genuinely differ (a 2024/2025
+     International Journal of Wildland Fire comparative analysis of
+     initial-attack containment objectives, doi 10.1071/WF24104, documents
+     BC/NWT using control within 24 hours and Alberta using containment by
+     10:00 the next day), so a {1, 2, 4, 8} hour robustness sweep is
+     folded into experiment 6 (section 9) rather than pretending one
+     universal number exists.
+  2. cvar_alpha = 0.95. The standard academic choice for CVaR (typical
+     published values are 0.95/0.99; Rockafellar and Uryasev's 2000 paper,
+     already the FROZEN objective's source, uses 0.95 and 0.99 in its own
+     examples). Experiment 4 (expectation vs CVaR) examines risk attitude
+     by design, so this fixes only the base case.
+  3. budget = 150,000,000,000 COP (150,000 millones). Anchor: the real,
+     already-verified FAC/UNGRD Firehawk program spend (section 8,
+     fac.mil.co / presidencia.gov.co, verified 2026-08-30): 150,000
+     millones COP for two S-70i units is Colombia's actual demonstrated
+     national budget commitment for aerial wildfire response capacity.
+     Disclosed implication: since cost_aircraft = 75,000 millones COP per
+     unit and aircraft need open bases (constraint 2), this budget fields
+     at most ONE Firehawk plus basing/water infrastructure in-model, a
+     genuinely binding tradeoff (the model is being asked what the real
+     program's money buys when the basing network must come out of the
+     same envelope). Experiment 6 sweeps budget by FROZEN design, so this
+     is the base case, not the only case examined.
+  4. mean_risk_weight (lambda) = 0.5 base case. No source can exist:
+     lambda is a decision-maker preference parameter by construction in
+     the mean-risk literature, so this is a disclosed midpoint convention,
+     not a sourced constant. Experiment 4 sweeps lambda by design (0 =
+     risk neutral through 1 = pure CVaR), which is where the paper's
+     actual risk-attitude analysis lives.
+  Also 2026-09-09: repository security remediation after the audit found
+  the git history had accidentally tracked a real .env (FIRMS_MAP_KEY,
+  abandoned by the user, no rotation needed per their own statement),
+  raw/processed data files, and __pycache__ binaries, all pushed to a
+  PUBLIC GitHub repo (JaimePesca/wildfire-basing) whose only commits were
+  placeholders. A clean orphan history was created (single initial commit,
+  code/tests/docs only, data/ as .gitkeep placeholders per section 7);
+  the old history is kept locally as branch backup-pre-clean-2026-09-09;
+  the final branch swap to main and the force push to origin are left to
+  the user (they also need to decide whether the repo stays public before
+  the unpublished research is pushed there).
 
 ## 11. Citation discipline [FROZEN]
 

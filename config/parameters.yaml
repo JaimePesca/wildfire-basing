@@ -39,16 +39,31 @@ firms:
   min_confidence: nominal
 
 # --- Optimization model parameters (CLAUDE.md sections 4 and 10) ---
-# These are open calls for the user, not to be resolved by code. Placeholders
-# only, do not treat these numbers as defaults to run the model with.
+# DECIDED 2026-09-09 (CLAUDE.md section 10): the user delegated these four
+# to be resolved on evidence from reliable sources. Full provenance for
+# each value is in CLAUDE.md section 10's 2026-09-09 entry; one-line
+# anchors repeated here so this file stands alone.
 
-budget: null            # PENDING, CLAUDE.md section 4 (B / budget) and section 10.
-cvar_alpha: null         # PENDING, CLAUDE.md section 4 (alpha / cvar_alpha), e.g. 0.95 is an example only.
-mean_risk_weight: null   # PENDING, CLAUDE.md section 4 (lambda / mean_risk_weight), 0 = risk neutral, 1 = pure CVaR.
-window: null             # PENDING, CLAUDE.md section 4 (W / window, critical suppression window length, hours).
-                         # Found 2026-08-30 to have no sourced value anywhere, unlike the three above it was
-                         # not even flagged here before; do not guess it, e.g. from daylight-hours astronomy
-                         # or an assumed operational shift length, without the user's sign-off.
+# B, COP. Anchor: the real FAC/UNGRD Firehawk program spend (150,000
+# millones COP for two S-70i units, fac.mil.co / presidencia.gov.co,
+# CLAUDE.md section 8). Base case only: experiment 6 sweeps budget.
+budget: 150000000000
+
+# alpha. Standard academic CVaR confidence level (Rockafellar and Uryasev
+# 2000 use 0.95/0.99 in their own examples). Experiment 4 varies risk
+# attitude by design.
+cvar_alpha: 0.95
+
+# lambda, 0 = risk neutral, 1 = pure CVaR. Disclosed midpoint CONVENTION,
+# not a sourced constant (lambda is a decision-maker preference parameter
+# by construction). Experiment 4 sweeps it by design.
+mean_risk_weight: 0.5
+
+# W, hours. Anchor: NWCG PMS 205 glossary, "Initial Attack Fire":
+# contained "within two hours after initial attack". Slightly tighter here
+# since this model's window includes the base-to-fire positioning leg.
+# Robustness sweep {1, 2, 4, 8} folded into experiment 6.
+window: 2.0
 
 # Real aircraft type (cost_aircraft, tank, speed): CONFIRMED 2026-08-30,
 # see src/model/aircraft.py for the full citation chain (FAC/UNGRD Sikorsky

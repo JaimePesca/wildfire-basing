@@ -33,9 +33,11 @@ exists" section).
 Two things this script does NOT resolve, both already flagged elsewhere and
 repeated here for anyone reading this file in isolation:
 
-1. budget/cvar_alpha/mean_risk_weight/window are the user's own call
-   (CLAUDE.md section 4/10). --illustrative-smoke-test must be passed
-   explicitly, exactly like run_instance.py/run_real_instance.py.
+1. UPDATE 2026-09-09: budget/cvar_alpha/mean_risk_weight/window are now
+   DECIDED (CLAUDE.md section 10) and default to those values here.
+   --illustrative-smoke-test now acknowledges the five swept sensitivity
+   parameters being fixed at one sweep point, exactly like
+   run_instance.py/run_real_instance.py.
 2. t_arrival[f] (CLAUDE.md section 5.3) is recomputed per instance size
    against THAT size's truncated base set, not the full real 120-base
    catalog, the same truncation-consistency compromise
@@ -196,15 +198,29 @@ def main() -> None:
     parser.add_argument(
         "--cost-water", type=float, required=True, help="Uniform cost_water[k] sweep point, COP, src/model/costs.py."
     )
-    parser.add_argument("--budget", type=float, required=True, help="B, COP. The user's own call.")
-    parser.add_argument("--cvar-alpha", type=float, required=True, help="alpha. The user's own call.")
-    parser.add_argument("--mean-risk-weight", type=float, required=True, help="lambda. The user's own call.")
-    parser.add_argument("--window", type=float, required=True, help="W, hours. The user's own call.")
+    parser.add_argument(
+        "--budget", type=float, default=150_000_000_000.0,
+        help="B, COP. DECIDED 2026-09-09 (CLAUDE.md section 10): the real FAC/UNGRD Firehawk program "
+        "spend; experiment 6 sweeps it.",
+    )
+    parser.add_argument(
+        "--cvar-alpha", type=float, default=0.95,
+        help="alpha. DECIDED 2026-09-09: standard academic CVaR level (Rockafellar-Uryasev 2000).",
+    )
+    parser.add_argument(
+        "--mean-risk-weight", type=float, default=0.5,
+        help="lambda. DECIDED 2026-09-09: disclosed midpoint convention; experiment 4 sweeps it.",
+    )
+    parser.add_argument(
+        "--window", type=float, default=2.0,
+        help="W, hours. DECIDED 2026-09-09: NWCG PMS 205 initial-attack containment standard.",
+    )
     parser.add_argument(
         "--illustrative-smoke-test",
         action="store_true",
-        help="Required flag: acknowledges budget/cvar-alpha/mean-risk-weight/window are not sourced/decided "
-        "values for this run, only a smoke test/demonstration of the comparison methodology.",
+        help="Required flag: acknowledges ros-scale/initial-fire-area/liters-per-sqm/cost-base/"
+        "cost-water are swept sensitivity parameters (CLAUDE.md section 3/9) fixed at one sweep point "
+        "for this run.",
     )
     parser.add_argument("--gurobi-time-limit", type=float, default=120.0, help="Seconds, pure-Gurobi baseline.")
     parser.add_argument("--gurobi-gap-rel", type=float, default=0.0, help="Relative MIP gap target, pure-Gurobi baseline.")
@@ -229,9 +245,10 @@ def main() -> None:
 
     if not args.illustrative_smoke_test:
         parser.error(
-            "budget/cvar-alpha/mean-risk-weight/window are the user's own call (CLAUDE.md section 4/10), "
-            "not to be treated as defaults. Pass --illustrative-smoke-test to acknowledge this run is a "
-            "methodology demonstration, not a real experiment."
+            "ros-scale/initial-fire-area/liters-per-sqm/cost-base/cost-water are swept sensitivity "
+            "parameters (CLAUDE.md section 3/9, experiment 6); a single run fixes them at one sweep "
+            "point. Pass --illustrative-smoke-test to acknowledge that. budget/cvar-alpha/"
+            "mean-risk-weight/window have DECIDED defaults (2026-09-09, CLAUDE.md section 10)."
         )
     if not pulp.GUROBI(msg=False).available():
         parser.error("This experiment requires a working Gurobi license (CLAUDE.md section 3's 'pure Gurobi' benchmark).")

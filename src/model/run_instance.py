@@ -12,14 +12,12 @@ instance" notes, src/model/README.md and src/scenarios/README.md). Two
 things it does NOT resolve, both flagged loudly rather than silently
 defaulted:
 
-1. budget/cvar_alpha/mean_risk_weight/window are the user's own call
-   (CLAUDE.md section 4/10, config/parameters.yaml explicitly says "do not
-   invent values for entries marked PENDING"). This script requires them as
-   CLI arguments with no built-in default, and --illustrative-smoke-test
-   must be passed explicitly to acknowledge that a given run is not using
-   sourced/decided values (mirroring the aircraft-speed-placeholder
-   precedent already used once in src/scenarios/assemble.py's own
-   verification history).
+1. UPDATE 2026-09-09: budget/cvar_alpha/mean_risk_weight/window are now
+   DECIDED (CLAUDE.md section 10, evidence-anchored, user-delegated) and
+   default to those values here. --illustrative-smoke-test is still
+   required, but what it acknowledges now is that ros_scale/A0/c/
+   cost_base/cost_water are swept sensitivity parameters (experiment 6)
+   being fixed at a single sweep point for the run.
 2. The real candidate water point set is 5,449 sites (src/pipeline,
    OSM+CAR combined). The exact McCormick linearization in milp.py adds a
    serve[i,f,k,m,s] auxiliary variable per (base, fire, water point,
@@ -103,24 +101,39 @@ def main() -> None:
         required=True,
         help="Uniform cost_water[k] sweep point, COP, see src/model/costs.py's documented range.",
     )
-    parser.add_argument("--budget", type=float, required=True, help="B, COP. The user's own call.")
-    parser.add_argument("--cvar-alpha", type=float, required=True, help="alpha. The user's own call.")
-    parser.add_argument("--mean-risk-weight", type=float, required=True, help="lambda. The user's own call.")
-    parser.add_argument("--window", type=float, required=True, help="W, hours. The user's own call.")
+    parser.add_argument(
+        "--budget", type=float, default=150_000_000_000.0,
+        help="B, COP. DECIDED 2026-09-09 (CLAUDE.md section 10): the real FAC/UNGRD Firehawk program "
+        "spend; experiment 6 sweeps it.",
+    )
+    parser.add_argument(
+        "--cvar-alpha", type=float, default=0.95,
+        help="alpha. DECIDED 2026-09-09: standard academic CVaR level (Rockafellar-Uryasev 2000).",
+    )
+    parser.add_argument(
+        "--mean-risk-weight", type=float, default=0.5,
+        help="lambda. DECIDED 2026-09-09: disclosed midpoint convention; experiment 4 sweeps it.",
+    )
+    parser.add_argument(
+        "--window", type=float, default=2.0,
+        help="W, hours. DECIDED 2026-09-09: NWCG PMS 205 initial-attack containment standard.",
+    )
     parser.add_argument(
         "--illustrative-smoke-test",
         action="store_true",
-        help="Required flag: acknowledges budget/cvar-alpha/mean-risk-weight/window are not sourced/decided "
-        "values for this run, only a smoke test of the pipeline plumbing.",
+        help="Required flag: acknowledges ros-scale/initial-fire-area/liters-per-sqm/cost-base/"
+        "cost-water are swept sensitivity parameters (CLAUDE.md section 3/9) fixed at one sweep point "
+        "for this run.",
     )
     parser.add_argument("--solver", choices=["cbc", "gurobi"], default="cbc")
     args = parser.parse_args()
 
     if not args.illustrative_smoke_test:
         parser.error(
-            "budget/cvar-alpha/mean-risk-weight/window are the user's own call (CLAUDE.md section 4/10), "
-            "not to be treated as defaults. Pass --illustrative-smoke-test to acknowledge this run is a "
-            "pipeline smoke test only, not a real experiment."
+            "ros-scale/initial-fire-area/liters-per-sqm/cost-base/cost-water are swept sensitivity "
+            "parameters (CLAUDE.md section 3/9, experiment 6); a single run fixes them at one sweep "
+            "point. Pass --illustrative-smoke-test to acknowledge that. budget/cvar-alpha/"
+            "mean-risk-weight/window have DECIDED defaults (2026-09-09, CLAUDE.md section 10)."
         )
 
     bases = pd.read_csv(args.bases)
