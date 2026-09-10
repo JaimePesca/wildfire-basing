@@ -37,6 +37,7 @@ from dataclasses import dataclass, fields
 import pandas as pd
 import pulp
 
+from src.experiments.common import solve_with_time_limit
 from src.model.aircraft import COST_AIRCRAFT, FIREHAWK_OPS_TIME_H, SPEED, TANK
 from src.model.costs import uniform_cost
 from src.model.milp import solve_model
@@ -66,6 +67,8 @@ class InstanceResult:
     n_fires: int
     integrated_status: str
     integrated_objective: float | None
+    integrated_mip_gap: float | None
+    integrated_timed_out: bool
     integrated_time_s: float
     sequential_best_phi: float | None
     sequential_best_objective: float | None
@@ -137,6 +140,15 @@ def main() -> None:
         "for this run.",
     )
     parser.add_argument("--solver", choices=["cbc", "gurobi"], default="gurobi")
+    parser.add_argument(
+        "--gurobi-time-limit",
+        type=float,
+        default=1800.0,
+        help="Wall-clock seconds per Gurobi solve (integrated arm AND each sequential phase). ADDED "
+        "2026-09-10 after an un-limited two-aircraft-regime integrated solve ran ~16 hours without "
+        "proving optimality (CLAUDE.md section 10); a timed-out integrated arm still reports its best "
+        "incumbent and remaining MIP gap.",
+    )
     parser.add_argument("--output-csv", default="results/experiment3_integrated_vs_sequential.csv")
     args = parser.parse_args()
 
@@ -151,7 +163,9 @@ def main() -> None:
         parser.error("no working Gurobi license found; pass --solver cbc or fix the license.")
 
     solver_factory = (
-        (lambda: pulp.GUROBI(msg=False)) if args.solver == "gurobi" else (lambda: pulp.PULP_CBC_CMD(msg=False))
+        (lambda: pulp.GUROBI(msg=False, timeLimit=args.gurobi_time_limit))
+        if args.solver == "gurobi"
+        else (lambda: pulp.PULP_CBC_CMD(msg=False))
     )
     instance_sizes = _parse_instance_sizes(args.instance_sizes)
 
@@ -201,10 +215,28 @@ def main() -> None:
         print(f"\n=== Instance: {n_bases} bases, {n_water} water points, {len(model_scenarios)} scenarios, {n_fires} fires ===")
 
         print("Solving integrated (full MILP)...")
-        t0 = time.perf_counter()
-        integrated = solve_model(params, pre, solver=solver_factory())
-        integrated_time = time.perf_counter() - t0
-        print(f"  status={integrated.status} objective={integrated.objective_value} time={integrated_time:.2f}s")
+        integrated_mip_gap = None
+        integrated_timed_out = False
+        if args.solver == "gurobi":
+            timed = solve_with_time_limit(params, pre, time_limit_s=args.gurobi_time_limit)
+            integrated = timed.solution
+            integrated_time = timed.elapsed_s
+            integrated_mip_gap = timed.mip_gap
+            integrated_timed_out = timed.timed_out
+        else:
+            t0 = time.perf_counter()
+            integrated = solve_model(params, pre, solver=solver_factory())
+            integrated_time = time.perf_counter() - t0
+        print(
+            f"  status={integrated.status} objective={integrated.objective_value} "
+            f"mip_gap={integrated_mip_gap} timed_out={integrated_timed_out} time={integrated_time:.2f}s"
+        )
+        if integrated_timed_out:
+            print(
+                "  NOTE: integrated arm hit the time limit; its objective is the best incumbent, an "
+                "UPPER bound on the true optimum, so a sequential result below it would only bound the "
+                "gap, not measure it exactly."
+            )
 
         print(f"Solving sequential (bases first, water second), phi in {args.phis}...")
         t0 = time.perf_counter()
@@ -237,6 +269,8 @@ def main() -> None:
                 n_fires=n_fires,
                 integrated_status=integrated.status,
                 integrated_objective=integrated.objective_value,
+                integrated_mip_gap=integrated_mip_gap,
+                integrated_timed_out=integrated_timed_out,
                 integrated_time_s=integrated_time,
                 sequential_best_phi=best.phi,
                 sequential_best_objective=best.objective_value,

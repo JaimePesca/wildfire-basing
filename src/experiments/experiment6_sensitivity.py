@@ -34,15 +34,14 @@ from __future__ import annotations
 
 import argparse
 import csv
-import time
 from dataclasses import dataclass, fields
 
 import pandas as pd
 import pulp
 
+from src.experiments.common import solve_with_time_limit
 from src.model.aircraft import COST_AIRCRAFT, FIREHAWK_OPS_TIME_H, SPEED, TANK
 from src.model.costs import uniform_cost
-from src.model.milp import solve_model
 from src.model.precompute import precompute
 from src.model.risk import empirical_cvar, expected_loss
 from src.model.travel_times import assemble_model_params
@@ -86,6 +85,8 @@ class SweepResult:
     axis: str
     value: float
     status: str
+    mip_gap: float | None
+    timed_out: bool
     objective_value: float | None
     expected_loss: float | None
     empirical_cvar: float | None
@@ -126,6 +127,14 @@ def main() -> None:
         action="store_true",
         help="Required flag: acknowledges the OAT design (no axis interactions) and the disclosed "
         "illustrative center for the five swept constants (module docstring).",
+    )
+    parser.add_argument(
+        "--gurobi-time-limit",
+        type=float,
+        default=1800.0,
+        help="Wall-clock seconds per solve. ADDED 2026-09-10: the budget axis enters multi-aircraft "
+        "regimes where an un-limited direct solve ran ~16 hours without proof (CLAUDE.md section 10); "
+        "timed-out solves report the best incumbent (an upper bound) plus the remaining MIP gap.",
     )
     parser.add_argument("--output-csv", default="results/experiment6_sensitivity.csv")
     args = parser.parse_args()
@@ -187,15 +196,19 @@ def main() -> None:
             speed=SPEED,
         )
         pre = precompute(params)
-        t0 = time.perf_counter()
-        solution = solve_model(params, pre, solver=pulp.GUROBI(msg=False))
-        elapsed = time.perf_counter() - t0
+        timed = solve_with_time_limit(params, pre, time_limit_s=args.gurobi_time_limit)
         probabilities = {s.scenario_id: s.probability for s in model_scenarios}
-        return solution, probabilities, elapsed
+        return timed, probabilities
 
-    def record(axis: str, value: float, solution, probabilities, elapsed: float) -> SweepResult:
+    def record(axis: str, value: float, timed, probabilities) -> SweepResult:
+        solution = timed.solution
+        elapsed = timed.elapsed_s
         e_loss = cvar = worst = None
-        if solution.status == "Optimal":
+        # Metrics come from the incumbent whenever one exists, including
+        # timed-out solves (the incumbent is a feasible plan; timed_out
+        # in the CSV flags that its objective is an upper bound, not a
+        # proven optimum).
+        if solution.objective_value is not None:
             dist = [(solution.loss[s_id], p) for s_id, p in probabilities.items()]
             e_loss = expected_loss(dist)
             cvar = empirical_cvar(dist, alpha=args.cvar_alpha)
@@ -205,6 +218,8 @@ def main() -> None:
             axis=axis,
             value=value,
             status=solution.status,
+            mip_gap=timed.mip_gap,
+            timed_out=timed.timed_out,
             objective_value=solution.objective_value,
             expected_loss=e_loss,
             empirical_cvar=cvar,
@@ -230,16 +245,16 @@ def main() -> None:
 
     results: list[SweepResult] = []
     print("\n=== center ===")
-    solution, probabilities, elapsed = build_and_solve(dict(CENTER))
-    results.append(record("center", 0.0, solution, probabilities, elapsed))
+    timed, probabilities = build_and_solve(dict(CENTER))
+    results.append(record("center", 0.0, timed, probabilities))
 
     for axis in args.axes:
         print(f"\n=== axis: {axis} (center {CENTER[axis]}) ===")
         for value in AXES[axis]:
             config = dict(CENTER)
             config[axis] = value
-            solution, probabilities, elapsed = build_and_solve(config)
-            results.append(record(axis, value, solution, probabilities, elapsed))
+            timed, probabilities = build_and_solve(config)
+            results.append(record(axis, value, timed, probabilities))
 
     print("\n=== Summary ===")
     header = [f.name for f in fields(SweepResult)]

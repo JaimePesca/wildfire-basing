@@ -38,6 +38,7 @@ from dataclasses import dataclass, fields
 import pandas as pd
 import pulp
 
+from src.experiments.common import solve_with_time_limit
 from src.model.aircraft import COST_AIRCRAFT, FIREHAWK_OPS_TIME_H, SPEED, TANK
 from src.model.costs import uniform_cost
 from src.model.milp import solve_model
@@ -62,6 +63,8 @@ DEFAULT_LAMBDAS = [0.0, 0.25, 0.5, 0.75, 1.0]
 class LambdaResult:
     mean_risk_weight: float
     status: str
+    mip_gap: float | None
+    timed_out: bool
     objective_value: float | None
     expected_loss: float | None
     empirical_cvar: float | None
@@ -107,6 +110,13 @@ def main() -> None:
         "cost-water are swept sensitivity parameters fixed at one sweep point for this run.",
     )
     parser.add_argument("--solver", choices=["cbc", "gurobi"], default="gurobi")
+    parser.add_argument(
+        "--gurobi-time-limit",
+        type=float,
+        default=1800.0,
+        help="Wall-clock seconds per solve (gurobi only). ADDED 2026-09-10, see CLAUDE.md section 10's "
+        "16-hour un-limited-solve finding; timed-out solves report the best incumbent plus MIP gap.",
+    )
     parser.add_argument("--output-csv", default="results/experiment4_expectation_vs_cvar.csv")
     args = parser.parse_args()
 
@@ -164,12 +174,23 @@ def main() -> None:
         pre = precompute(params)
 
         print(f"\n=== lambda = {lam} ===")
-        t0 = time.perf_counter()
-        solution = solve_model(params, pre, solver=solver_factory())
-        elapsed = time.perf_counter() - t0
+        mip_gap = None
+        timed_out = False
+        if args.solver == "gurobi":
+            timed = solve_with_time_limit(params, pre, time_limit_s=args.gurobi_time_limit)
+            solution = timed.solution
+            elapsed = timed.elapsed_s
+            mip_gap = timed.mip_gap
+            timed_out = timed.timed_out
+        else:
+            t0 = time.perf_counter()
+            solution = solve_model(params, pre, solver=solver_factory())
+            elapsed = time.perf_counter() - t0
 
         e_loss = cvar = worst = None
-        if solution.status == "Optimal":
+        # Metrics from the incumbent whenever one exists, including a
+        # timed-out solve (timed_out flags it as an upper bound).
+        if solution.objective_value is not None:
             dist = [(solution.loss[s_id], p) for s_id, p in probabilities.items()]
             e_loss = expected_loss(dist)
             cvar = empirical_cvar(dist, alpha=args.cvar_alpha)
@@ -187,6 +208,8 @@ def main() -> None:
             LambdaResult(
                 mean_risk_weight=lam,
                 status=solution.status,
+                mip_gap=mip_gap,
+                timed_out=timed_out,
                 objective_value=solution.objective_value,
                 expected_loss=e_loss,
                 empirical_cvar=cvar,

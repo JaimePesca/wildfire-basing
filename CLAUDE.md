@@ -1094,6 +1094,26 @@ not to be silently resolved:
   near-optimal in single-aircraft regimes, the integrated model matters
   when fleets grow or water is the binding margin", itself a
   publishable, policy-relevant characterization, not a failure.
+  Round 2 outcome, 2026-09-10: (a) the razor-band probe (78,000M) also
+  produced gap 0 (8.7e-11, float noise), with the SAME optimal
+  objective as at 80,000M and 90,000M, meaning even a leftover that
+  buys only 6 water points suffices because the fires worth serving
+  already cluster on few shared points; single-aircraft regimes are now
+  thoroughly, multi-point confirmed sequential-friendly. (b) The
+  two-aircraft probe (160,000M) never finished: the direct, un-limited
+  integrated MILP at 20 bases/50 water/81 fires ran for almost 16
+  wall-clock hours (about 48 CPU-hours) without proving optimality and
+  was killed. TWO consequences, both acted on 2026-09-10: (1) this IS
+  experiment 2's runtime-blow-up thesis materializing at real data, at
+  a size whose single-aircraft twin solves in under 8 minutes, a
+  publishable data point for the matheuristic's necessity; (2) every
+  experiment whose sweep can enter a multi-aircraft regime now bounds
+  its Gurobi solves and reports the best incumbent plus remaining MIP
+  gap honestly instead of hanging (src/experiments/common.py's
+  solve_with_time_limit, wired into experiments 3, 4 and 6, default
+  1800 s; a timed-out incumbent is an UPPER bound on the optimum, so a
+  sequential result below it bounds the gap rather than measuring it,
+  stated in the script output, not glossed over).
 - Matheuristic tuning sweep: src/experiments/tune_matheuristic.py,
   IMPLEMENTED 2026-09-09: grid over random_destroy_prob x
   n_bases_per_neighborhood x n_water_per_neighborhood x seeds against the
