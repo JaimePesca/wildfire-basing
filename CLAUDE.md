@@ -1114,6 +1114,66 @@ not to be silently resolved:
   1800 s; a timed-out incumbent is an UPPER bound on the optimum, so a
   sequential result below it bounds the gap rather than measuring it,
   stated in the script output, not glossed over).
+  Round 2(b) outcome, 2026-09-10, time-limited rerun: after 30 minutes
+  the direct integrated solve's incumbent was 14747.007 with MIP gap
+  1.0 (100 percent, the lower bound is essentially 0, the instance is
+  genuinely hard); the sequential baseline at phi=1.0 (phase A buys 1
+  base + 2 Firehawks, 151,000M) matched that incumbent to 2.5e-6
+  relative in 26 SECONDS. Two honest readings, both recorded: the
+  integrated-vs-sequential gap at the two-aircraft regime remains
+  UNMEASURED (the integrated side cannot prove optimality, so equality
+  with its incumbent says nothing about the true gap), and the
+  sequential baseline is itself a strong, fast heuristic for the
+  integrated problem at this scale, a warm-start candidate worth
+  mentioning in the paper. Measuring the true two-aircraft gap needs
+  the matheuristic as the integrated arm (or far longer limits), still
+  open.
+- First full runs of experiments 1, 4 and 6, all 2026-09-10, DECIDED
+  parameters, results/ CSVs:
+  1. Experiment 1 (results/experiment1_bilinear_vs_milp.csv, sizes 3:5,
+     5:10, 8:15, 2 scenarios): objective match EXACT (True) at every
+     size, the section 5.2 linearization-exactness claim confirmed on
+     real data. Honest surprise, do not overclaim the opposite: the
+     literal bilinear arm was consistently FASTER (time ratio
+     0.61-0.78) at these small sizes, presumably because Gurobi's
+     presolve linearizes the binary-times-bounded-integer product
+     internally at least as well as our explicit big-M; the runtime
+     advantage of the explicit linearization does not appear at small
+     scale and the paper should report the equivalence result, not
+     claim a speedup that is not there (larger-scale runs may differ,
+     not yet measured).
+  2. Experiment 4 (results/experiment4_expectation_vs_cvar.csv, 20:50,
+     10 scenarios, lambda in {0, 0.25, 0.5, 0.75, 1}): with one
+     affordable Firehawk the E-CVaR frontier is DEGENERATE, lambda 0
+     through 0.75 all give E[loss] 4858.75 and CVaR/worst 32626.92
+     (the single aircraft cannot hedge the worst day, so no tradeoff
+     exists to buy); at lambda = 1.0 (pure CVaR) the solver returns a
+     DOMINATED plan (same CVaR, E[loss] jumps to 6555.49, 77 vs 74
+     escapes, only 19 water points opened), the textbook degeneracy of
+     pure CVaR being indifferent off the tail, which is exactly why
+     the FROZEN objective is a mean-risk convex combination rather
+     than pure CVaR; report as a confirmation, with the SAA caveat
+     that at alpha 0.95 with 10 scenarios CVaR equals worst-case
+     (risk.py's documented behavior).
+  3. Experiment 6 (results/experiment6_sensitivity.csv, OAT, 21
+     solves): budget is the ONLY axis that moves the objective
+     (80,000M ties the 150,000M center at 18742.84; 225,000M improves
+     the incumbent to 14747.01 with 2 aircraft; 300,000M to 11318.38
+     with 3, both timed out at gap 1.0 so both are upper bounds); all
+     six other axes (window 1-8 h, A0 1-30 ha, c 1.5-10, ros_scale
+     0.5-2, cost_base 300M-6,000M, cost_water 15M-300M) leave the
+     optimal objective IDENTICAL to float precision, only the specific
+     alternate-optimal base/water choice shuffles. Structural reading,
+     worth a paragraph in the paper: under the real 150,000M budget
+     the system is FLEET-limited, not fire-physics- or site-cost-
+     limited; 74 of 81 fires escape because one aircraft can serve one
+     fire per day (constraint 5), so requirement-side constants and
+     site costs have no room to matter. Caveat to carry next to that
+     paragraph: section 5.3's day-scenario design already discloses
+     that constraint 5 models the whole day as one no-reuse episode; a
+     2 h window inside a 12 h day means real single-aircraft capacity
+     is understated, which inflates the marginal value of additional
+     aircraft; FROZEN, disclosed, not silently changed.
 - Matheuristic tuning sweep: src/experiments/tune_matheuristic.py,
   IMPLEMENTED 2026-09-09: grid over random_destroy_prob x
   n_bases_per_neighborhood x n_water_per_neighborhood x seeds against the
