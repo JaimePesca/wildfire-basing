@@ -1,7 +1,36 @@
 # src/experiments
 
-CLAUDE.md section 9's six experiments. Only experiment 2 has a script so
-far; the rest are not yet implemented.
+CLAUDE.md section 9's six experiments. Experiments 2 and 3 have scripts;
+a matheuristic tuning sweep supports them. The rest are not yet
+implemented.
+
+## experiment3_integrated_vs_sequential.py (the star experiment)
+
+Integrated (full section 5.2 MILP, one solve) vs the bases-first/
+water-second sequential baseline (src/model/sequential.py: phase A is
+milp.build_model reused unchanged on a water-blind ModelParams with a
+virtual zero-cost best-case water point and budget phi*B; phase B fixes
+phase A's bases/fleet and solves the full model on the real catalog).
+Sweeps the budget split phi and reports the BEST sequential result, so
+the comparison is best-case, not a straw man.
+tests/test_model_sequential.py proves dominance (sequential can never
+beat integrated) and a strict gap at EVERY phi on a hand-built water
+cost trap instance. First real runs 2026-09-09 (DECIDED parameters,
+2 scenarios, up to 20:50, cost_water at both 50M and 300M): gap 0, an
+honest null at these sweep points, with the recorded explanation
+(the single affordable Firehawk dominates the 150,000M budget and the
+leftover buys plenty of water at 15 fires); see CLAUDE.md section 10 for
+where the gap should be hunted instead.
+
+## tune_matheuristic.py
+
+Grid sweep (random_destroy_prob x neighborhood sizes x seeds) against
+the known direct-Gurobi optimum of a real instance; measures hit rate
+(escape reliability), iterations-to-optimum, runtime. no_improve_limit
+deliberately disabled so early stopping cannot confound escape
+reliability with patience. Output: results/tune_matheuristic.csv, ranked;
+intended to replace run_real_instance.py's illustrative defaults with
+evidence-backed ones.
 
 ## experiment2_matheuristic_vs_gurobi.py
 
@@ -13,8 +42,10 @@ design (why build_model()/solve() are called directly instead of
 solve_model(), which discards the objective on any non-Optimal status; how
 a Gurobi time-limited run's best-found incumbent is still reported).
 
-Usage (`--illustrative-smoke-test` and the four user-decision parameters
-are required, same as `src/model/run_instance.py`):
+Usage (`--illustrative-smoke-test` acknowledges the five swept
+sensitivity parameters fixed at one sweep point;
+budget/cvar-alpha/mean-risk-weight/window default to the DECIDED
+2026-09-09 values, CLAUDE.md section 10):
 
 ```bash
 python -m src.experiments.experiment2_matheuristic_vs_gurobi \
@@ -22,7 +53,6 @@ python -m src.experiments.experiment2_matheuristic_vs_gurobi \
     --max-scenarios 2 \
     --ros-scale 1.0 --initial-fire-area 5.0 --liters-per-sqm 3.0 \
     --cost-base 1000000000 --cost-water 50000000 \
-    --budget 100000000000 --cvar-alpha 0.95 --mean-risk-weight 0.5 --window 8.0 \
     --illustrative-smoke-test
 ```
 
@@ -65,14 +95,18 @@ is sufficient at every scale, until a real tuning sweep is done.
 
 ## Not yet done
 
-- Experiments 1, 3, 4, 5, 6 (CLAUDE.md section 9) have no script yet.
+- Experiments 1, 4, 5, 6 (CLAUDE.md section 9) have no script yet.
   Experiment 1's two solve paths already exist and are cross-validated
   (`src/model/bilinear.py`, `tests/test_model_bilinear.py`), but no
   comparison/reporting script wraps them the way this file wraps
-  experiment 2.
+  experiments 2 and 3.
 - A systematic instance-size sweep large enough to show pure Gurobi's
   runtime actually blow up (CLAUDE.md's own framing of experiment 2's
   point) has not been run; only small smoke-test sizes so far.
-- Tuning `--random-destroy-prob`/`--n-bases-per-neighborhood`/
-  `--n-water-per-neighborhood`/`--max-iterations` against real escape
-  reliability, not just runtime.
+- Experiment 3 at scales/sweep points where the water budget genuinely
+  binds (the recorded gap-0 null results and where to hunt instead:
+  CLAUDE.md section 10, 2026-09-09 entry), and a matheuristic-based
+  integrated arm at full catalog scale.
+- Acting on tune_matheuristic.py's ranking: updating
+  run_real_instance.py's neighborhood/random-destroy defaults from its
+  results CSV once a full sweep has been run and read.

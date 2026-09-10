@@ -17,6 +17,7 @@ section 5.2 number so it can be checked directly against the document.
 | `costs.py` | `cost_base[i]`/`cost_water[k]`: no Colombia-specific source exists (a real web search was done, see the module docstring), DECIDED 2026-08-30 to treat both as swept sensitivity parameters, uniform across sites, same honesty pattern as A0/c/ros_scale. |
 | `run_instance.py` | CLI that wires every real-data stage together (candidate sites, a bootstrap scenario draw, the aircraft/cost modules above) into one `ModelParams` and solves it. CONFIRMED WORKING 2026-08-30 end to end on real data; see "First real-data solve" below for the two real bugs this run surfaced and fixed. |
 | `bilinear.py` | The literal bilinear/quadratic formulation (experiment 1's other half), built directly against `gurobipy`. CONFIRMED WORKING 2026-08-30, see "bilinear.py" below. |
+| `sequential.py` | The bases-first/water-second sequential baseline (experiment 3's comparator, CLAUDE.md section 3). Phase A reuses `build_model` unchanged on a water-blind ModelParams (virtual zero-cost best-case water point, budget phi*B); phase B fixes phase A's bases/fleet and solves the full model. IMPLEMENTED 2026-09-09, tests/test_model_sequential.py. |
 
 Run the tests: `pytest tests/test_model_*.py`. They use small, hand-verified
 synthetic instances (documented inline with the hand calculation), never

@@ -1035,6 +1035,54 @@ not to be silently resolved:
      not a sourced constant. Experiment 4 sweeps lambda by design (0 =
      risk neutral through 1 = pure CVaR), which is where the paper's
      actual risk-attitude analysis lives.
+- Experiment 3 (integrated vs sequential, the star experiment):
+  IMPLEMENTED 2026-09-09, src/model/sequential.py +
+  src/experiments/experiment3_integrated_vs_sequential.py. Sequential
+  baseline design DECIDED 2026-09-09: phase A ("bases first") reuses
+  milp.build_model UNCHANGED on a water-blind ModelParams (the real water
+  catalog replaced by one virtual zero-cost point per instance whose
+  t_fire_water is each fire's true best over the full catalog, i.e. the
+  classical planner's implicit "water will be available wherever needed,
+  free" assumption), with budget phi * B, phi being the exogenous budget
+  split a sequential planner must fix a priori and the integrated model
+  decides endogenously (section 2); phase B ("water second") solves the
+  FULL section 5.2 model with phase A's base_open/n_aircraft fixed via
+  variable bounds (open or closed, a sequential planner does not reopen
+  the basing question), real water costs, real total budget. Experiment 3
+  sweeps phi and compares the integrated optimum against the BEST
+  sequential result, a best-case sequential planner, not a straw man.
+  Reusing build_model for both phases makes formula drift impossible.
+  Verified (tests/test_model_sequential.py, 7 tests): dominance (the
+  sequential solution is feasible for the integrated model, so it can
+  never beat it) and, on a hand-built "water cost trap" instance, the
+  paper's core claim in miniature: phase A chases the marginally more
+  valuable fire whose only water point is economically out of reach, and
+  the sequential result is STRICTLY worse than the integrated optimum at
+  EVERY phi, because no split can undo a misdirected base commitment.
+  First real-data run 2026-09-09 (5:10, 10:25, 20:50 bases:water, 2
+  scenarios, DECIDED parameters, cost_water at the 50M sweep point):
+  best-case sequential MATCHED the integrated optimum (gap 0) at every
+  size, with phi = 0.5 collapsing entirely (phase A cannot afford the
+  75,000M Firehawk with only 75,000M) and phi >= 0.6 recovering. A
+  second run at cost_water = 300M (the top of the documented sweep
+  range) also produced gap 0 on the same instance: with budget 150,000M
+  dominated by the single affordable aircraft (75,000M), the leftover
+  (~74,000M) buys hundreds of water points, so the water side never
+  competes for budget at 15 fires. Honest null result at these sweep
+  points; the gap the paper needs must be hunted where the water budget
+  genuinely binds (many more scenarios/fires needing distinct water
+  points, or the LOW end of experiment 6's budget sweep, e.g. budget
+  just above one aircraft's cost), not asserted.
+- Matheuristic tuning sweep: src/experiments/tune_matheuristic.py,
+  IMPLEMENTED 2026-09-09: grid over random_destroy_prob x
+  n_bases_per_neighborhood x n_water_per_neighborhood x seeds against the
+  known direct-Gurobi optimum of a real instance, measuring hit rate
+  (escape reliability), iterations-to-optimum and runtime, with
+  no_improve_limit deliberately disabled so early stopping cannot
+  confound escape reliability with patience (the exact mistake in the
+  first random_destroy_prob=0.3 real-scale check, 2026-09-04 entry).
+  Results go to results/tune_matheuristic.csv; defaults in
+  run_real_instance.py should be updated from its ranking.
   Also 2026-09-09: repository security remediation after the audit found
   the git history had accidentally tracked a real .env (FIRMS_MAP_KEY,
   abandoned by the user, no rotation needed per their own statement),
