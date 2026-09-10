@@ -1,0 +1,47 @@
+# Lightweight, Windows-wheel-friendly stack for the FIRMS/event pipeline
+# (section 5). FIRMS ships as CSV, so this first block deliberately has no
+# geopandas/fiona/GDAL; the municipality spatial join is deferred until a
+# boundary layer is on disk (see CLAUDE.md section 6 and section 10). The
+# candidate-site pipeline (sites_water.py, further down) does need real
+# vector formats and adds those separately.
+pandas>=2.0
+numpy>=1.24
+scipy>=1.10
+pyproj>=3.5
+pyyaml>=6.0
+pytest>=7.4
+requests>=2.31
+openpyxl>=3.1
+
+# Added for src/pipeline/sites_water.py (candidate water point sites, set K):
+# real vector GIS formats (SHP/GPKG/GDB) are needed to read a manually
+# obtained IGAC water-bodies layer, unlike the CSV-only FIRMS stage above.
+# Windows wheels confirmed to install cleanly (pyogrio and fiona both ship
+# prebuilt win_amd64 wheels, no local GDAL build needed).
+geopandas>=1.1
+pyogrio>=0.13
+fiona>=1.10
+
+# Added for src/model/ (CLAUDE.md section 5.2): the big-M linearized MILP is
+# built with PuLP (MIT licensed, bundles the free CBC solver), so the model
+# is solvable today without a Gurobi license. build_model()'s output is a
+# plain pulp.LpProblem; swapping to Gurobi later (once licensed, see
+# src/model/README.md) is a solver-backend argument, not a rewrite. Pinned
+# below 4.0: PuLP 3.x emits deprecation warnings for the direct
+# LpVariable(...) construction and PULP_CBC_CMD used in src/model/milp.py
+# (both still fully functional as of pulp 3.3.2), 4.0 is expected to change
+# these APIs; revisit this pin and milp.py together when 4.0 ships.
+pulp>=2.8,<4.0
+
+# Added for src/scenarios/land_cover.py (CLAUDE.md section 5.3, ros[f]): reads
+# ESA WorldCover 10m GeoTIFF tiles (data/raw/esa_worldcover_2021_*.tif),
+# used instead of IDEAM CORINE after CORINE proved structurally unreachable
+# (section 8). Windows wheel confirmed to install cleanly.
+rasterio>=1.3
+
+# Added for src/model/bilinear.py (experiment 1's literal bilinear/quadratic
+# formulation, NonConvex=2) and src/experiments/ (experiment 2's pure-Gurobi
+# benchmark): imported directly, not only through PuLP's GUROBI wrapper.
+# Needs a Gurobi license to actually solve (academic license confirmed
+# working 2026-08-30, CLAUDE.md section 10); pip install works without one.
+gurobipy>=11.0

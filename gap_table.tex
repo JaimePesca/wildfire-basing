@@ -1,0 +1,155 @@
+% ---------------------------------------------------------------------------
+% Gap classification table for the ITOR submission
+% Requires in the preamble:
+%   \usepackage{booktabs}
+%   \usepackage{threeparttable}
+% Notes:
+%   - table* spans both columns; if your draft is single column, change
+%     table* to table.
+%   - \citet keys below (maras2023, huang2025, ...) must match your .bib.
+%   - Special characters are written with LaTeX escapes so the file compiles
+%     without a UTF-8 setup. If you use XeLaTeX/LuaLaTeX with fontspec you may
+%     replace them with the literal characters.
+% ---------------------------------------------------------------------------
+
+% ---------------------------------------------------------------------------
+% Confirmation sources added after the 2026-07-21 research pass. Recorded here
+% so every cell value can be independently re-checked, per CLAUDE.md section 11.
+%
+% - Mara\c{s} et al. 2023, "GIS-Based Determination of the Optimal Heliport and
+%   Water Source Locations for Forest Fire Suppression Using Multi-Objective
+%   Programming," Aerospace 10(3):305, doi:10.3390/aerospace10030305. Open
+%   access, fetched directly at mdpi.com/2226-4310/10/3/305. Confirms Joint=No
+%   (two separate sequential set-covering models, one for heliports, one for
+%   water sources) and Cyclic=No (helicopter cruise speed fixed at 80 kts and
+%   response-time thresholds are constant inputs; no base-fire-water cycle time
+%   is computed endogenously; the authors flag stochastic, cycle-dependent
+%   helicopter performance as future work, not part of the current model).
+%   Dagger removed from this row, both cells now fully confirmed.
+%
+% - Skorin-Kapov, Mesaric, Pereniguez-Garcia and Skorin-Kapov 2024, "Scheduling
+%   aerial resource operations for the extinction of large-scale wildfires,"
+%   Omega 122:102941, doi:10.1016/j.omega.2023.102941. Primary full text
+%   paywalled (ScienceDirect 403, ResearchGate blocked, author site required
+%   login). Bases=No, Joint=No, Strategic=No, Uncertainty=No confirmed directly
+%   from the openly available abstract, read via the girtel.upct.es
+%   research-group mirror and ideas.repec.org. Water=Partial reasonably
+%   confirmed via a secondary search-engine snippet quoting the paper ("each
+%   wildfire zone has its associated water loading point"), matching this
+%   table's own definition of Partial. Cyclic=No remains based only on a
+%   secondary paraphrase ("a ratio of the number of drops that each aircraft
+%   can perform is used in the model framework," suggesting drop count is an
+%   exogenous input) and could not be verified against the actual constraints;
+%   still flagged with a dagger below.
+%
+% - Wang et al. 2026 Water cell: not resolved. Extensive search (WebSearch
+%   across many phrasings, Crossref API queries filtered 2025-2026, Google
+%   Scholar via WebFetch, MDPI/Fire journal search, ScienceDirect/Springer
+%   search) did not locate a paper matching this row's profile (Bases=Yes,
+%   Water=No, deterministic, strategic, first-authored by Wang, 2026). Ruled
+%   out as non-matches: Wang, Xu, Huang, Pan and Yin 2026, "An Air-Ground
+%   Collaborative Emergency Material Dispatch Method for Wildfires in Dynamic
+%   Time-Varying Environments," Fire 9(7):279, doi:10.3390/fire9070279
+%   (dynamic dispatch under fire-spread and weather uncertainty, wrong
+%   Uncertainty profile); Huang, Zeng, Pan, Wang, Yin, Li and Huang 2026, "A
+%   Decision Indicator System for Takeoff and Landing Site Selection of Bucket
+%   Firefighting Helicopters in Wildfire Emergency Response," Fire 9(4):148,
+%   doi:10.3390/fire9040148 (Wang only 4th of 7 authors, tactical/operational
+%   not strategic); Zhao and Huang 2025, "Data-driven multi-objective
+%   optimization of sustainable aviation emergency network for forest fire
+%   rescue," Sustainable Operations and Computers (wrong year, wrong
+%   Uncertainty profile, not first-authored by Wang). Cell left unchanged;
+%   dagger and pending status preserved as-is until the user supplies the
+%   exact DOI or title from their own reference manager.
+%
+% - Wei et al. (2015): DECIDED 2026-07-23 by the user. The intended citation is
+%   Wei, Bevers and Belval 2015, "Designing seasonal initial attack resource
+%   deployment and dispatch rules using a two-stage stochastic programming
+%   procedure," Forest Science 61(6):1021-1032, not the other 2015 paper by an
+%   overlapping author group, Wei, Bevers, Belval and Bird 2015, "A
+%   Chance-Constrained Programming Model to Allocate Wildfire Initial Attack
+%   Resources for a Fire Season," Forest Science 61(2):278-288. Dagger removed.
+% ---------------------------------------------------------------------------
+
+\begin{table*}[t]
+\centering
+\begin{threeparttable}
+\caption{Classification of the related literature against the three conditions
+that define the gap. Bases: the model decides the location of aerial bases or
+heliports. Water: the model decides the location of water refill points or
+reservoirs. Joint: both location decisions are made within a single integrated
+model. Cyclic: aircraft productivity is endogenous to the base to fire to water
+refill cycle within the decision model. Strategic: infrastructure or deployment
+decisions taken before the season or the fire day. Uncertainty: treatment of
+uncertainty (No, deterministic; SP, stochastic programming; RO, robust
+optimization). Yes and No indicate whether the feature is present; Partial
+indicates partial satisfaction, for example positioning resources at existing
+bases, or associating water demand by zone without siting refill points.
+Columns Joint, Cyclic and Strategic correspond to conditions (a), (b) and (c)
+of the gap statement. This paper adopts a mean-risk objective combining
+expectation and CVaR within the SP entry.}
+\label{tab:gap}
+\small
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{lcccccc}
+\toprule
+Reference & Bases & Water & Joint & Cyclic & Strategic & Uncertainty \\
+\midrule
+Hodgson and Newstead (1978)                       & Yes     & No      & No & No  & Yes & No \\
+MacLellan and Martell (1996)\textsuperscript{a}   & Yes     & No      & No & No  & Yes & No \\
+Sk\"old Gustafsson et al. (2024)\textsuperscript{\ddag} & Yes & No  & No & No  & Yes & No \\
+Wang et al. (2026)\textsuperscript{\dag}          & Yes     & No      & No & No  & Yes & No \\
+Haight and Fried (2007)                           & Partial & No      & No & No  & Yes & SP \\
+Ntaimo et al. (2013)                              & Partial & No      & No & No  & Yes & SP \\
+Wei, Bevers and Belval (2015)                     & Partial & No      & No & No  & Yes & SP \\
+Mendes and Alvelos (2025)                         & Partial & No      & No & No  & Yes & RO \\
+Alfaro et al. (2024)                              & No      & Yes     & No & No  & Yes & No \\
+Ramalho et al. (2021)                             & No      & Yes     & No & No  & Yes & No \\
+Ramalho et al. (2024)                             & No      & Yes     & No & No  & Yes & No \\
+Rodr\'iguez-Veiga et al. (2018)                   & No      & Partial & No & Yes & No  & No \\
+Rodr\'iguez Barreiro et al. (2026)                & No      & Partial & No & Yes & No  & No \\
+Skorin-Kapov et al. (2024)\textsuperscript{\dag}  & No      & Partial & No & No  & No  & No \\
+Mara\c{s} et al. (2023)                           & Yes     & Yes     & No & No  & Yes & No \\
+Huang and Zhao (2025)                             & Yes     & No      & No & No  & Yes & SP \\
+\midrule
+\textbf{This paper}                               & \textbf{Yes} & \textbf{Yes} & \textbf{Yes} & \textbf{Yes} & \textbf{Yes} & \textbf{SP} \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}[flushleft]
+\footnotesize
+\item[a] Minimizes expected cost over multi-season historical demand, without recourse.
+\item[\ddag] Conference paper (ISCRAM proceedings).
+\item[\dag] Cells still pending full-text confirmation: the Water cell for
+Wang et al. (the paper itself could not be located despite an extensive
+search) and the Cyclic cell for Skorin-Kapov et al. (confirmed only via a
+secondary paraphrase of the paywalled primary text). The Bases, Joint,
+Strategic and Uncertainty cells in the Skorin-Kapov et al. row are confirmed
+against the paper's openly available abstract; its Water cell is reasonably
+confirmed via a secondary snippet quoting the paper, not the abstract itself.
+The Cyclic cell for Mara\c{s} et al. is now fully confirmed from the
+open-access paper and the dagger has been removed from that row. See the
+source comment above the table for full bibliographic detail on each
+confirmation.
+\end{tablenotes}
+\end{threeparttable}
+\end{table*}
+
+% ---------------------------------------------------------------------------
+% Paragraph that accompanies the table (body text)
+% ---------------------------------------------------------------------------
+
+Reading Table~\ref{tab:gap} by column isolates the gap. Cycle-dependent aircraft
+productivity (Cyclic) appears only at the operational level, where the
+infrastructure is given and no siting takes place; the joint siting of bases and
+water refill points (Joint) appears in no prior model; and no work combines
+cycle-dependent productivity with strategic, uncertainty-aware siting. Since
+columns Joint, Cyclic and Strategic are exactly conditions (a), (b) and (c) of
+the gap statement, the table and the verbal argument stand or fall together. The
+proposed model is the only row that satisfies all three, under stochastic
+programming with a mean-risk CVaR objective. The nearest works each own a single
+one of these pillars and none of the others: \citet{maras2023} site both bases
+and water but in two sequential deterministic models, without a cycle;
+\citet{rodriguezbarreiro2026} capture the cycle, and even select loading points,
+but operationally, with given infrastructure and no uncertainty; and
+\citet{huang2025} are strategic and stochastic but decide no water point and use
+a coverage radius rather than a refill cycle.

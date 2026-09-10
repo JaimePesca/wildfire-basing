@@ -1,0 +1,57 @@
+# Parameters for the data pipeline and (later) the optimization model.
+# Naming and status tags (FROZEN, PROPOSED, PENDING) follow CLAUDE.md.
+# Do not invent values for entries marked PENDING, they are the user's call.
+
+crs:
+  # EPSG:9377, MAGNA-SIRGAS 2018 / Origen-Nacional (CTM12), verified against
+  # epsg.io, spatialreference.org and the IOGP registry mirror, and confirmed
+  # to resolve and transform correctly with pyproj's bundled PROJ data.
+  # This is IGAC's current national single-zone standard (Resolucion 471 de
+  # 2020), superseding the legacy six-zone Gauss-Kruger family (e.g. EPSG:3116).
+  # See CLAUDE.md section 5 for the reasoning behind this choice.
+  epsg: 9377
+
+st_dbscan:
+  # Section 5: eps_spatial about 750 to 1000 m, anchored on VIIRS 375 m
+  # resolution. Default sits in the middle of that documented range.
+  eps_spatial_m: 850
+  # Section 5: eps_temporal about 1 to 2 days, anchored on satellite revisit
+  # and fire persistence. Default sits in the middle of that documented range.
+  eps_temporal_days: 1.5
+  # Section 5: keep min_pts low. In an initial-attack context, single
+  # detection fires can be the ones that matter. Use the confidence filter,
+  # not min_pts, to control false positives.
+  min_pts: 1
+  # Optional chaining mitigation (section 5 risk 1): post-hoc split a cluster
+  # when the time gap between consecutive detections (sorted by time) exceeds
+  # this many days. Off by default, see st_dbscan.py docstring for rationale.
+  split_on_intra_event_gap: false
+  max_intra_event_gap_days: 2.0
+
+firms:
+  # The real lever against false positives is the confidence filter, not
+  # min_pts (section 5). VIIRS confidence is categorical (low/nominal/high),
+  # MODIS confidence is numeric 0-100; clean.py handles both. This value is
+  # the minimum accepted level/threshold.
+  # For VIIRS: one of "low", "nominal", "high" (rows below this level on the
+  # low < nominal < high ordering are dropped).
+  # For MODIS: a 0-100 numeric threshold.
+  min_confidence: nominal
+
+# --- Optimization model parameters (CLAUDE.md sections 4 and 10) ---
+# These are open calls for the user, not to be resolved by code. Placeholders
+# only, do not treat these numbers as defaults to run the model with.
+
+budget: null            # PENDING, CLAUDE.md section 4 (B / budget) and section 10.
+cvar_alpha: null         # PENDING, CLAUDE.md section 4 (alpha / cvar_alpha), e.g. 0.95 is an example only.
+mean_risk_weight: null   # PENDING, CLAUDE.md section 4 (lambda / mean_risk_weight), 0 = risk neutral, 1 = pure CVaR.
+window: null             # PENDING, CLAUDE.md section 4 (W / window, critical suppression window length, hours).
+                         # Found 2026-08-30 to have no sourced value anywhere, unlike the three above it was
+                         # not even flagged here before; do not guess it, e.g. from daylight-hours astronomy
+                         # or an assumed operational shift length, without the user's sign-off.
+
+# Real aircraft type (cost_aircraft, tank, speed): CONFIRMED 2026-08-30,
+# see src/model/aircraft.py for the full citation chain (FAC/UNGRD Sikorsky
+# S-70i Firehawk acquisition) and CLAUDE.md sections 4/8/10. Not repeated
+# here as literal numbers to avoid two sources of truth drifting apart;
+# import from src.model.aircraft (COST_AIRCRAFT, TANK, SPEED, FIREHAWK_OPS_TIME_H).
