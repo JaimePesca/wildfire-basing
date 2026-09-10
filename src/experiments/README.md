@@ -1,8 +1,31 @@
 # src/experiments
 
-CLAUDE.md section 9's six experiments. Experiments 1, 2 and 3 have
-scripts; a matheuristic tuning sweep supports them. Experiments 4, 5 and
-6 are not yet implemented.
+CLAUDE.md section 9's six experiments. Experiments 1, 2, 3, 4 and 6
+have scripts; a matheuristic tuning sweep supports them. Experiment 5
+is not yet implemented (it needs the current-infrastructure catalog
+built first).
+
+## experiment4_expectation_vs_cvar.py
+
+Sweeps mean_risk_weight (lambda 0 to 1) on one real-data instance and
+reports how the first-stage plan and the loss distribution shift with
+risk attitude. Expected loss and CVaR are recomputed EMPIRICALLY from
+each solution's loss distribution (src/model/risk.py), identically for
+every lambda, because the solved var_level variable is meaningless at
+lambda=0 (risk.py's docstring). With few SAA scenarios, CVaR_0.95 is
+effectively worst-case, a disclosed SAA caveat.
+
+## experiment6_sensitivity.py
+
+One-at-a-time (OAT) sensitivity sweep around a disclosed center:
+DECIDED budget/window plus the documented-range midpoints of the five
+swept constants (A0, c, ros_scale, cost_base, cost_water); window
+{1,2,4,8} folded in per CLAUDE.md 2026-09-09. OAT captures marginal
+effects, NOT axis interactions (disclosed design limit; a full
+factorial would be thousands of direct solves). ros_scale is rescaled
+multiplicatively from a single ros_scale=1.0 enrichment, exact because
+the section 5.3 formula is linear in it, avoiding re-querying the live
+NASA POWER wind API per sweep point. Requires --acknowledge-oat-design.
 
 ## experiment1_bilinear_vs_milp.py
 
@@ -106,16 +129,21 @@ is sufficient at every scale, until a real tuning sweep is done.
 
 ## Not yet done
 
-- Experiments 4, 5, 6 (CLAUDE.md section 9) have no script yet.
-  Experiment 5 additionally needs the current-infrastructure catalog
-  (IDECA/DNBC, CLAUDE.md section 8) built first.
+- Experiment 5 (CLAUDE.md section 9) has no script yet; it also needs
+  the current-infrastructure catalog (IDECA/DNBC, CLAUDE.md section 8)
+  built first.
+- SAA optimality gap and confidence interval reporting (CLAUDE.md
+  section 3 promises it; no script exists yet).
 - A systematic instance-size sweep large enough to show pure Gurobi's
   runtime actually blow up (CLAUDE.md's own framing of experiment 2's
   point) has not been run; only small smoke-test sizes so far.
 - Experiment 3 at scales/sweep points where the water budget genuinely
   binds (the recorded gap-0 null results and where to hunt instead:
   CLAUDE.md section 10, 2026-09-09 entry), and a matheuristic-based
-  integrated arm at full catalog scale.
-- Acting on tune_matheuristic.py's ranking: updating
-  run_real_instance.py's neighborhood/random-destroy defaults from its
-  results CSV once a full sweep has been run and read.
+  integrated arm at full catalog scale for experiments 3, 4 and 6
+  (their scripts are direct-solve-only today, deliberately, since the
+  exact optimum is the yardstick at small scale).
+- Tuning: the 2026-09-09/10 sweep saturated (hit_rate 1.00 everywhere)
+  at the easy DECIDED base case; a DISCRIMINATING reliability sweep at
+  the trap regime or larger instances is still open
+  (src/matheuristic/README.md).
