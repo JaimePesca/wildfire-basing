@@ -219,8 +219,19 @@ tuned.
   `src/experiments/README.md`), but no systematic sweep across instance
   sizes large enough to show pure Gurobi's runtime actually blow up has
   been run yet, only small smoke-test sizes.
-- Tuning neighborhood size, iteration/no-improve budgets, and
-  `random_destroy_prob` against real runtime and real escape reliability
-  beyond the data points above; no systematic sweep has been run yet.
+- Tuning: a first systematic sweep RAN 2026-09-09/10
+  (src/experiments/tune_matheuristic.py, results/tune_matheuristic.csv,
+  24 configs x 5 seeds against the known direct optimum at the DECIDED
+  base-case parameters): hit_rate 1.00 everywhere including
+  random_destroy_prob=0.0, optimum reached in the first accepted
+  iteration in every run, so at the base case the instance does not
+  discriminate quality and the sweep's information is runtime scaling
+  (n_water_per_neighborhood dominates; the random operator adds ~75%
+  overhead). Defaults kept on that evidence: n_bases=5, n_water=10,
+  random_destroy_prob=0.3 (the overhead is the insurance premium against
+  the proven stuck-forever failure mode above, which lives at parameter
+  regimes this easy base case does not probe). Still open: a
+  DISCRIMINATING reliability sweep at the trap regime or larger
+  instances.
 - Deciding whether a tie-accepting consolidation/shrink pass is worth adding
   given the site-accumulation behavior disclosed just above.

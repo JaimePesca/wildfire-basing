@@ -1073,6 +1073,27 @@ not to be silently resolved:
   genuinely binds (many more scenarios/fires needing distinct water
   points, or the LOW end of experiment 6's budget sweep, e.g. budget
   just above one aircraft's cost), not asserted.
+  Gap hunt round 1, 2026-09-09 (20:50, 10 scenarios, 81 fires,
+  cost_water 300M, budgets 80,000M and 90,000M): STILL gap 0, and the
+  run exposed the structural reason, worth stating in the paper: under
+  any single-aircraft budget regime (roughly 76,000M <= B < 152,000M),
+  constraint 5 caps service at ONE fire per scenario, so at most |S|
+  distinct water points are ever needed, and even a 4,000M leftover
+  buys 13 of them at the top-of-range 300M cost; the water side simply
+  cannot compete for budget, and phase A picks an equally good base.
+  The integrated model's value must therefore live in (a) a razor-thin
+  budget band just above one aircraft (roughly 77,000-79,000M at
+  cost_water 300M, where the leftover buys FEWER water points than |S|
+  and the integrated model can exploit that water_open is FIRST-stage,
+  one point serving fires from different scenario days in the same
+  region, a clustering phase A cannot see), or (b) multi-aircraft
+  regimes (B >= ~152,000M) where the joint placement of two-plus bases
+  interacts with shared water investments. Both probed in round 2
+  (budgets 78,000M and 160,000M); if the gap stays 0 there too,
+  experiment 3's honest headline becomes conditional: "sequential is
+  near-optimal in single-aircraft regimes, the integrated model matters
+  when fleets grow or water is the binding margin", itself a
+  publishable, policy-relevant characterization, not a failure.
 - Matheuristic tuning sweep: src/experiments/tune_matheuristic.py,
   IMPLEMENTED 2026-09-09: grid over random_destroy_prob x
   n_bases_per_neighborhood x n_water_per_neighborhood x seeds against the
@@ -1081,8 +1102,25 @@ not to be silently resolved:
   no_improve_limit deliberately disabled so early stopping cannot
   confound escape reliability with patience (the exact mistake in the
   first random_destroy_prob=0.3 real-scale check, 2026-09-04 entry).
-  Results go to results/tune_matheuristic.csv; defaults in
-  run_real_instance.py should be updated from its ranking.
+  RUN 2026-09-09/10 (20:50, 2 scenarios, DECIDED parameters, 24 configs
+  x 5 seeds x 100 iterations, results/tune_matheuristic.csv): hit_rate
+  1.00 EVERYWHERE, including random_destroy_prob=0.0, with the optimum
+  reached in the first accepted iteration in every run; at the decided
+  base case this instance does not discriminate quality at all (the 2 h
+  window leaves few containable fires and many alternate-optimal base
+  choices), so the sweep's real information is runtime scaling:
+  n_water_per_neighborhood dominates cost (10 to 25 to 50 roughly
+  doubles each step), n_bases 5 to 10 doubles it, and the random
+  operator adds about 75 percent overhead (its scattered sub-MILPs
+  solve slower than geographic ones). Evidence-based defaults kept:
+  n_bases=5, n_water=10 (fastest, quality-equivalent), and
+  random_destroy_prob=0.3 KEPT despite the overhead, as insurance
+  against the PROVEN 2026-09-04 stuck-forever failure mode, which lives
+  at other parameter regimes this easy base case does not probe; a
+  discriminating reliability sweep needs the old trap regime or larger
+  instances, disclosed, not silently skipped. Two runs showed final
+  objectives about 2.5e-6 BELOW the direct-solve yardstick, solver
+  tolerance noise (Gurobi default relative MIP gap), not a bug.
   Also 2026-09-09: repository security remediation after the audit found
   the git history had accidentally tracked a real .env (FIRMS_MAP_KEY,
   abandoned by the user, no rotation needed per their own statement),

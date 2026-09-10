@@ -1,8 +1,19 @@
 # src/experiments
 
-CLAUDE.md section 9's six experiments. Experiments 2 and 3 have scripts;
-a matheuristic tuning sweep supports them. The rest are not yet
-implemented.
+CLAUDE.md section 9's six experiments. Experiments 1, 2 and 3 have
+scripts; a matheuristic tuning sweep supports them. Experiments 4, 5 and
+6 are not yet implemented.
+
+## experiment1_bilinear_vs_milp.py
+
+The literal bilinear formulation (src/model/bilinear.py, gurobipy
+NonConvex=2) vs the big-M linearized MILP (src/model/milp.py) on the
+same real-data instance: objective values must MATCH (section 5.2's
+exactness claim, already proven on synthetic instances by
+tests/test_model_bilinear.py); the runtime ratio is the practical
+payoff. Keep instance sizes small: the bilinear arm is the expensive
+one, and the match check needs both arms at proven optimality. The
+script warns loudly if objectives ever differ.
 
 ## experiment3_integrated_vs_sequential.py (the star experiment)
 
@@ -95,11 +106,9 @@ is sufficient at every scale, until a real tuning sweep is done.
 
 ## Not yet done
 
-- Experiments 1, 4, 5, 6 (CLAUDE.md section 9) have no script yet.
-  Experiment 1's two solve paths already exist and are cross-validated
-  (`src/model/bilinear.py`, `tests/test_model_bilinear.py`), but no
-  comparison/reporting script wraps them the way this file wraps
-  experiments 2 and 3.
+- Experiments 4, 5, 6 (CLAUDE.md section 9) have no script yet.
+  Experiment 5 additionally needs the current-infrastructure catalog
+  (IDECA/DNBC, CLAUDE.md section 8) built first.
 - A systematic instance-size sweep large enough to show pure Gurobi's
   runtime actually blow up (CLAUDE.md's own framing of experiment 2's
   point) has not been run; only small smoke-test sizes so far.
