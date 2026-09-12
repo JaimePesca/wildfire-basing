@@ -52,7 +52,7 @@ def _multi_base_case(n_extra_far_bases: int = 2) -> ModelParams:
         ops_time=0.0,
         cvar_alpha=0.95,
         mean_risk_weight=0.0,
-        initial_fire_area=100.0,
+        initial_fire_area=0.01,  # hectares: 0.01 ha = 100 m^2
         liters_per_sqm=1.0,
         cost_base=cost_base,
         cost_aircraft={"T1": 1000.0},
@@ -111,7 +111,7 @@ def _far_bases_trap_case() -> ModelParams:
         ops_time=0.0,
         cvar_alpha=0.95,
         mean_risk_weight=0.0,
-        initial_fire_area=100.0,
+        initial_fire_area=0.01,  # hectares: 0.01 ha = 100 m^2
         liters_per_sqm=1.0,
         cost_base=cost_base,
         cost_aircraft={"T1": 8000.0},

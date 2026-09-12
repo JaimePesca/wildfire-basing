@@ -9,12 +9,24 @@ k in water_points, m in aircraft_types, s in scenarios:
     cycle_time[f,k,m] = 2 * t_fire_water[f,k] + ops_time
     drops[i,f,k,m]    = max(0, floor((window - t_base_fire[i,f]) / cycle_time[f,k,m]))
     liters[i,f,k,m]   = drops[i,f,k,m] * tank[m]
-    requirement[f]    = liters_per_sqm * initial_fire_area * exp(ros[f] * t_arrival[f])
+    requirement[f]    = liters_per_sqm * (initial_fire_area * 10,000) * exp(ros[f] * t_arrival[f])
     Mbig[m]           = floor(budget / cost_aircraft[m])
 
 The max(0, ...) clip on drops is explicit in section 5.2 (the section 4
 sketch omitted it): a base too far to complete even one round trip within
 the window contributes zero drops, not a negative one.
+
+Units of requirement[f], made explicit 2026-09-12 (CLAUDE.md section 10):
+initial_fire_area (A0) is quoted in HECTARES everywhere user-facing (CLI
+flags, CLAUDE.md section 3's documented range, the manuscript's parameter
+table), while liters_per_sqm (c) is liters per SQUARE METER. The
+hectare-to-square-meter conversion (SQM_PER_HECTARE below) therefore lives
+here, in exactly one place, so requirement[f] comes out in liters. Before
+2026-09-12 this factor was MISSING (requirement was 10,000x too small,
+trivially below one tank load for every real fire), which silently
+neutralized the containment physics in every earlier real-data run; see
+CLAUDE.md section 10's 2026-09-12 entry for the full account and which
+results were regenerated.
 
 Every fire-indexed quantity here (t_base_fire, t_fire_water, ros,
 t_arrival, drops, liters, requirement) is scoped to its scenario per
@@ -29,6 +41,11 @@ import math
 from dataclasses import dataclass
 
 from .schema import ModelParams
+
+# initial_fire_area (A0) is user-facing in hectares; liters_per_sqm (c) is
+# per square meter. This is the single place the conversion happens (see
+# module docstring).
+SQM_PER_HECTARE = 10_000.0
 
 
 @dataclass(frozen=True)
@@ -95,6 +112,7 @@ def compute_requirement(params: ModelParams) -> dict[tuple[str, str], float]:
             requirement[(scenario.scenario_id, fire.fire_id)] = (
                 params.liters_per_sqm
                 * params.initial_fire_area
+                * SQM_PER_HECTARE
                 * math.exp(fire.ros * fire.t_arrival)
             )
     return requirement

@@ -7,6 +7,7 @@ from __future__ import annotations
 import math
 
 from src.model.precompute import (
+    SQM_PER_HECTARE,
     compute_cycle_time,
     compute_drops,
     compute_liters,
@@ -84,9 +85,12 @@ def test_liters_is_drops_times_tank():
 
 
 def test_requirement_matches_exponential_formula():
+    # initial_fire_area is in hectares, liters_per_sqm per square meter:
+    # the hectare-to-m^2 conversion must appear exactly once (CLAUDE.md
+    # section 10, 2026-09-12: it was missing before that date).
     params = _tiny_params()
     requirement = compute_requirement(params)
-    expected = 2.0 * 10.0 * math.exp(0.1 * 5.0)
+    expected = 2.0 * 10.0 * SQM_PER_HECTARE * math.exp(0.1 * 5.0)
     assert requirement[("s1", "F1")] == expected
 
 
@@ -103,5 +107,5 @@ def test_precompute_bundles_all_four_tables():
     assert pre.cycle_time[("s1", "F1", "W1", "T1")] == 1.2
     assert pre.drops[("s1", "B1", "F1", "W1", "T1")] == 2
     assert pre.liters[("s1", "B1", "F1", "W1", "T1")] == 2000.0
-    assert pre.requirement[("s1", "F1")] == 2.0 * 10.0 * math.exp(0.5)
+    assert pre.requirement[("s1", "F1")] == 2.0 * 10.0 * SQM_PER_HECTARE * math.exp(0.5)
     assert pre.Mbig["T1"] == 10

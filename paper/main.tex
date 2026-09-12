@@ -346,7 +346,15 @@ in the remaining window. A base too far to complete even one round trip
 contributes zero drops. This is the formal core of the cycle insight:
 $\tau^{\mathrm{bf}}_{if}$ enters once, through the numerator, while
 $\tau^{\mathrm{fw}}_{fk}$ divides the window, so water geometry scales
-productivity multiplicatively.
+productivity multiplicatively. Three conventions are implicit in the
+drop count and disclosed here: the aircraft is assumed to arrive at the
+fire with an empty tank, so its first drop, like every later one, costs
+a full refill cycle (an aircraft departing loaded would gain at most
+one drop; we take the conservative count); a single cruise speed
+covers loaded and unloaded legs, matching the single sourced speed
+specification; and flight time carries no operating cost in the
+objective, so dispatch is limited by the fleet and the budget, never
+by fuel accounting.
 
 Containment is physical. Fire $f$ is contained if delivered liters
 reach
@@ -355,18 +363,34 @@ R_f = c\, A_0\, e^{\rho_f t^{\mathrm{arr}}_f},
 \label{eq:requirement}
 \end{equation}
 an exponential area growth form adopted as a phenomenological
-simplification for tractability. We disclose its provenance precisely:
-exponential fire area growth is documented in structural fire science
-\citep{ramachandran1986}; wildland-specific growth models are typically
-elliptical \citep{vanwagner1969} and empirical growth varies by fuel
-and weather, so Equation~\eqref{eq:requirement} is a modeling choice
-that fits a single scalar $\rho_f$ per fire, not a wildland-validated
-law. Its constants $A_0$ and $c$ have no Colombia-specific calibration
-source and are treated as swept sensitivity parameters throughout
+simplification for tractability, with $c$ in liters per square meter
+and $A_0$ in square meters ($A_0$ is quoted in hectares throughout the
+paper and converted exactly once in the implementation). We disclose
+its provenance precisely: exponential fire area growth is documented
+in structural fire science \citep{ramachandran1986};
+wildland-specific growth models are typically elliptical
+\citep{vanwagner1969} and empirical growth varies by fuel and weather,
+so Equation~\eqref{eq:requirement} is a modeling choice that fits a
+single scalar $\rho_f$ per fire, not a wildland-validated law. Its
+constants $A_0$ and $c$ have no Colombia-specific calibration source
+and are treated as swept sensitivity parameters throughout
 (Section~\ref{sec:exp6}). The arrival time $t^{\mathrm{arr}}_f$ is
 defined exogenously as the travel time from the closest candidate base,
 $\min_{i \in I} \tau^{\mathrm{bf}}_{if}$, so that $R_f$ remains a pure
 per-fire parameter independent of the dispatch decision.
+
+The requirement and the drop count deliberately run on two different
+clocks, which we state explicitly. $R_f$ sizes the fire at the
+earliest feasible attack time, detection plus $\min_i
+\tau^{\mathrm{bf}}_{if}$; the drop count $d_{ifkm}$ measures the
+window from dispatch, charging each base its full positioning leg.
+When the dispatching base is not the closest candidate, the fire has
+grown for longer than $t^{\mathrm{arr}}_f$, so the requirement that
+dispatch faces is understated; we accept this conservative-window,
+optimistic-requirement pairing rather than endogenize it, because a
+dispatch-dependent requirement would become $R_{if}$ and couple the
+containment threshold to the recourse decision, breaking the
+parameter-only precomputation that keeps the model linear.
 
 \subsection{Two-stage mean-risk formulation}
 \label{sec:milp}
@@ -454,7 +478,7 @@ companion repository. Figure~\ref{fig:studyarea} shows the study area.
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.72\textwidth]{fig_study_area}
-\caption{The Cundinamarca instance: 2,413 fire events detected during
+\caption{The Cundinamarca instance: 2,425 fire events detected during
 calendar year 2024, 120 candidate aerial bases, and 5,449 candidate
 water refill points, in the national planimetric CRS (EPSG:9377).}
 \label{fig:studyarea}
@@ -464,13 +488,19 @@ water refill points, in the national planimetric CRS (EPSG:9377).}
 
 Fire events come from NASA FIRMS VIIRS 375 m active fire detections
 \citep{firms} for the full calendar year 2024 over a Cundinamarca
-bounding box: 4,689 detections pass a nominal-confidence filter and are
-clustered into 2,413 events with ST-DBSCAN \citep{birant2007}, using
-$\varepsilon_{\mathrm{spatial}} = 850$ m, anchored on the 375 m sensor
-resolution, and $\varepsilon_{\mathrm{temporal}} = 1.5$ days, anchored
-on revisit and persistence; sensitivity of the event catalog to both
-radii is part of the pipeline. Detections are projected to EPSG:9377,
-the national single-zone planimetric standard, before clustering.
+bounding box: 4,719 raw detections reduce to 4,470 after coordinate
+validation, exact deduplication, and a nominal-confidence filter, and
+are clustered into 2,425 events with ST-DBSCAN \citep{birant2007},
+using $\varepsilon_{\mathrm{spatial}} = 850$ m, anchored on the 375 m
+sensor resolution, and $\varepsilon_{\mathrm{temporal}} = 1.5$ days,
+anchored on revisit and persistence; sensitivity of the event catalog
+to both radii is part of the pipeline. Detections are projected to
+EPSG:9377, the national single-zone planimetric standard, before
+clustering. Our implementation adapts \citet{birant2007} in the way
+standard across the ST-DBSCAN software ecosystem: the original
+non-spatial attribute threshold becomes a continuous temporal radius
+intersected with the spatial one, and border points join the first
+cluster that reaches them.
 
 A scenario is one historical calendar day, matching the stochastic
 unit of \citet{wei2015}: the 366-day pool of 2024 (282 days with at
@@ -548,7 +578,7 @@ Window $W$ & 2.0 h & NWCG initial attack standard & swept 1, 2, 4, 8 h \\
 CVaR level $\alpha$ & 0.95 & standard in the CVaR literature & exp.\ 4 varies risk \\
 Risk weight $\lambda$ & 0.5 & midpoint convention & swept 0 to 1 \\
 Aircraft cost, tank, speed & Firehawk values & sourced (FAC program) & fixed \\
-$A_0$ & 5 ha & no source; sensor-resolution anchor & swept 1 to 30 ha \\
+$A_0$ & 1 ha & NWCG size-class anchor\tnote{a} & swept 0.1 to 14 ha \\
 $c$ & 3 L/m$^2$ & no verified source & swept 1.5 to 10 \\
 $\rho_{\mathrm{scale}}$ & 1.0 & no source & swept 0.5 to 2 \\
 $c^{\mathrm{base}}_i$ (uniform) & 1{,}000 M COP & US benchmarks, scaled & swept 300 to 6{,}000 M \\
@@ -561,6 +591,11 @@ $c^{\mathrm{wat}}_k$ (uniform) & 50 M COP & US benchmarks, scaled & swept 15 to 
 ($10^9$ COP). Agency initial-attack standards genuinely differ, from
 two-hour containment \citep{nwcg2026} to next-morning control
 \citep{korkola2024}, hence the window sweep.
+\item[a] The $A_0$ range runs from the NWCG size class A bound (0.1
+ha), through a size class B fire at the base case (1 ha), up to the
+area of a single VIIRS 375 m pixel (14 ha), the sensor's localization
+bound rather than a typical fire size; none of these is a Colombian
+calibration, which is why the axis is swept.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
@@ -619,9 +654,16 @@ All experiments run on an Intel Core i7-13620H with 16 GB RAM under
 Windows 11, with Gurobi 13.0.2 as the MIP solver (PuLP 3.3.2 as the
 modeling layer). Unless stated otherwise, instances use the base-case
 parameters of Table~\ref{tab:params}, candidate subsets are taken in
-catalog order, and scenario subsets renormalize probabilities. Every
-table and figure is generated by a committed script from a committed
-results file.
+catalog order, and scenario subsets renormalize probabilities. Two
+reading conventions apply throughout. Arrival times
+$t^{\mathrm{arr}}_f$ are recomputed over each instance's truncated
+candidate base subset, so the requirement is defined consistently
+within every instance. And because $c^{\mathrm{wat}}_k$ enters only
+the budget constraint, a solution with slack budget carries
+alternate-optimal open water points at no objective cost, so the
+count of open water points in any reported solution is bookkeeping
+noise, never a finding. Every table and figure is generated by a
+committed script from a committed results file.
 
 \subsection{Exactness of the linearization}
 \label{sec:exp1}
@@ -827,7 +869,11 @@ containment law is a phenomenological exponential with uncalibrated,
 swept constants; scenarios cover a single year's bootstrap pool, so
 interannual variability is unrepresented; each scenario is a
 no-reuse episode, understating per-aircraft daily capacity; the
-aircraft type is single; and site costs are uniform sweep points. Two
+aircraft type is single; site costs are uniform sweep points; and
+water points are uncapacitated, with no volume depletion or
+simultaneous-use congestion, a simplification that matters most
+precisely in the multi-aircraft regimes where the integrated model's
+value concentrates. Two
 pieces of the full experimental program are ongoing: SAA replication
 with optimality-gap confidence intervals, and measuring, rather than
 bounding, the integrated-versus-sequential gap in multi-aircraft

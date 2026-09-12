@@ -6,13 +6,21 @@ liters_per_sqm, ros_scale, cost_base, cost_water), and (added
 Design DECIDED 2026-09-09: one-at-a-time (OAT) around a disclosed
 center, not a full factorial (7 axes at 3-4 levels each would be
 thousands of direct solves). The center is: the DECIDED values for
-budget (150,000M COP) and window (2 h), and the illustrative
-mid-range points used throughout this repo's smoke tests for the five
-swept constants (A0=5 ha, c=3 L/m^2, ros_scale=1.0, cost_base=1,000M,
-cost_water=50M), each inside its documented range (CLAUDE.md section
-3). OAT shows each axis's marginal effect on the optimal plan and
-objective; interactions between axes are NOT captured, a disclosed
-limitation of the design, not an oversight.
+budget (150,000M COP) and window (2 h), and illustrative points for
+the five swept constants (A0=1 ha, c=3 L/m^2, ros_scale=1.0,
+cost_base=1,000M, cost_water=50M), each inside its documented range
+(CLAUDE.md section 3). OAT shows each axis's marginal effect on the
+optimal plan and objective; interactions between axes are NOT
+captured, a disclosed limitation of the design, not an oversight.
+
+A0 RE-ANCHORED 2026-09-12 (CLAUDE.md section 10): center 1 ha, axis
+{0.1, 5, 14} ha, replacing the earlier 5 ha center and {1, 15, 30} ha
+axis. The old range was chosen while requirement[f] silently lacked
+the hectare-to-m^2 conversion (the 2026-09-12 units bug, fixed in
+src/model/precompute.py); with correct units the new anchors are NWCG
+fire size classes A (0.1 ha) and B (center, 1 ha) at the low end and
+the single-VIIRS-pixel localization bound (375 m pixel, about 14 ha,
+a sensor bound, not a typical fire size) at the top.
 
 ros_scale subtlety, handled exactly rather than approximately:
 ros_scale enters ros[f] at scenario ENRICHMENT time (section 5.3), and
@@ -63,7 +71,7 @@ DEFAULT_WORLDPOP_RASTER = "data/raw/worldpop_col_2020_constrained.tif"
 CENTER = {
     "budget": 150_000_000_000.0,
     "window": 2.0,
-    "initial_fire_area": 5.0,
+    "initial_fire_area": 1.0,  # ha; re-anchored 2026-09-12, see module docstring
     "liters_per_sqm": 3.0,
     "ros_scale": 1.0,
     "cost_base": 1_000_000_000.0,
@@ -72,7 +80,7 @@ CENTER = {
 AXES = {
     "budget": [80_000_000_000.0, 225_000_000_000.0, 300_000_000_000.0],
     "window": [1.0, 4.0, 8.0],
-    "initial_fire_area": [1.0, 15.0, 30.0],
+    "initial_fire_area": [0.1, 5.0, 14.0],  # ha; re-anchored 2026-09-12
     "liters_per_sqm": [1.5, 6.0, 10.0],
     "ros_scale": [0.5, 2.0],
     "cost_base": [300_000_000.0, 3_000_000_000.0, 6_000_000_000.0],

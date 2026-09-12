@@ -42,7 +42,7 @@ def _simple_case() -> ModelParams:
         ops_time=0.0,
         cvar_alpha=0.95,
         mean_risk_weight=0.5,
-        initial_fire_area=100.0,
+        initial_fire_area=0.01,  # hectares: 0.01 ha = 100 m^2
         liters_per_sqm=1.0,
         cost_base={"B1": 500.0},
         cost_aircraft={"T1": 4000.0},
@@ -127,7 +127,7 @@ def _water_cost_trap_case() -> ModelParams:
         ops_time=0.0,
         cvar_alpha=0.95,
         mean_risk_weight=0.5,
-        initial_fire_area=100.0,
+        initial_fire_area=0.01,  # hectares: 0.01 ha = 100 m^2
         liters_per_sqm=1.0,
         cost_base={"B1": 100.0, "B2": 100.0},
         cost_aircraft={"T1": 400.0},

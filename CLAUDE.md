@@ -113,10 +113,23 @@ fixed-wing air tankers, over 10 L/m^2 for helicopters) come from an aviation
 industry article (aero-space.eu) that itself discloses no academic or
 technical citation, not a verified primary source. Illustrative sweep ranges
 (section 9 experiment 6 will use these, not treat them as calibrated):
-A0 roughly 1 to 30 hectares (anchored on the VIIRS 375 m detection
-resolution already used in section 5, a geometric anchor, not a fire-science
-value); c roughly 1.5 to 10 L/m^2 (the unverified aviation-industry range
-above, chosen for lack of a better source, not because it is confirmed).
+A0 0.1 to 14 hectares, center 1 ha (RE-ANCHORED 2026-09-12 alongside the
+units fix below; low anchor NWCG fire size class A, 0.25 acre or about
+0.1 ha; center a size class B initial-attack fire; top anchor the area of
+one VIIRS 375 m pixel, about 14 ha, the sensor's localization bound, not
+a typical fire size; the earlier 1-30 ha range had been picked while the
+units bug below made the sweep physically inert); c roughly 1.5 to 10
+L/m^2 (the unverified aviation-industry range above, chosen for lack of a
+better source, not because it is confirmed).
+
+Units of requirement[f], FIXED 2026-09-12: A0 is quoted in hectares
+everywhere user-facing while c is liters per square meter, so the
+requirement computation converts hectares to square meters exactly once
+(src/model/precompute.py, SQM_PER_HECTARE = 10,000). Before 2026-09-12
+that factor was silently missing, making requirement[f] 10,000x too
+small (tens of liters against a 3,785 L tank), which neutralized the
+containment physics in every earlier real-data run; see section 10's
+2026-09-12 entry for which results were invalidated and regenerated.
 
 Candidate site costs cost_base[i] and cost_water[k]: DECIDED 2026-08-30,
 same treatment, same rationale. A real web search (fac.mil.co,
@@ -181,7 +194,7 @@ explicit, disclosed conversion.
 | D_f | `value_at_risk[f]` | value or damage exposed at fire f |
 | rho_f | `ros[f]` | propagation rate for fire f; DECIDED 2026-08-21 this is itself formula-derived (land cover class times slope times wind), not a raw input, see section 5.3 and ros_scale below |
 | t_arr_f | `t_arrival[f]` | time from FIRMS detection to start of the critical window (exogenous, independent of dispatch base; decided 2026-08-18, see requirement[f] below) |
-| A0 | `initial_fire_area` | global constant, initial fire area at detection for the requirement[f] exponential; not fixed, swept over roughly 1-30 ha in the section 9 experiment 6 sensitivity sweep, see section 3 |
+| A0 | `initial_fire_area` | global constant, initial fire area at detection for the requirement[f] exponential, quoted in HECTARES (converted to m^2 exactly once, in src/model/precompute.py, units fix 2026-09-12); not fixed, swept over 0.1-14 ha (re-anchored 2026-09-12) in the section 9 experiment 6 sensitivity sweep, see section 3 |
 | c | `liters_per_sqm` | global constant, liters per square meter to control a fire, for requirement[f]; not fixed, swept over roughly 1.5-10 L/m^2 in the section 9 experiment 6 sensitivity sweep, see section 3 |
 | -- | `ros_scale` | global constant, overall magnitude of ros[f]; not fixed, third parameter swept in the section 9 experiment 6 sensitivity sweep, see section 5.3 |
 | alpha | `cvar_alpha` | CVaR confidence level; DECIDED 2026-09-09: 0.95 (the standard academic choice, used in Rockafellar and Uryasev 2000's own examples, section 10) |
@@ -315,8 +328,11 @@ scenarios:
   round trip within the window contributes zero drops, not a negative one;
   the section 4 sketch omitted this clip)
 - liters[i,f,k,m] = drops[i,f,k,m] * tank[m]
-- requirement[f] = liters_per_sqm * initial_fire_area * exp(ros[f] * t_arrival[f])
-  (initial_fire_area and liters_per_sqm are swept per experiment 6, not
+- requirement[f] = liters_per_sqm * initial_fire_area * 10,000 * exp(ros[f] * t_arrival[f])
+  (initial_fire_area is in hectares and liters_per_sqm per square meter,
+  so the 10,000 m^2/ha conversion is part of the formula, made explicit
+  2026-09-12 after being found silently missing, see sections 3 and 10;
+  initial_fire_area and liters_per_sqm are swept per experiment 6, not
   fixed, section 3/9; requirement[f] is still a precomputed constant within
   any single MILP solve, recomputed once per sweep point)
 - Mbig[m] = floor(budget / cost_aircraft[m]), a valid, budget-derived upper
@@ -432,9 +448,14 @@ not silently: day scenarios assume fleet availability resets each day, no
 cross-day dynamics (multi-day fire persistence, crew fatigue, maintenance
 downtime) are modeled. UPDATE 2026-08-30: the full calendar year 2024
 (2024-01-01 to 2024-12-31, not just January) has now been downloaded and
-run through the pipeline, data/processed/events_2024-full.csv, 4689 real
-raw VIIRS detections, 2413 events, 366-day pool (282 days with at least one
-fire). This is a real improvement over the January-only pool (one full
+run through the pipeline, data/processed/events_2024-full.csv, 366-day
+pool (282 days with at least one fire). COUNTS CORRECTED 2026-09-12 (the
+earlier "4689 raw detections, 2413 events" did not reproduce from the
+raw chunk files with the committed code): the reproducible chain is
+4,719 raw VIIRS detections -> 4,470 after lat/lon validation, exact
+dedup and the nominal-confidence filter -> 2,425 events; events and the
+200-scenario bootstrap draw (seed 0, verified to reproduce the exact
+same 200 source dates) regenerated end to end that day, see section 10. This is a real improvement over the January-only pool (one full
 year's seasonality, not one month), but is still a single year, not
 multiple years; a genuinely representative bootstrap pool for interannual
 variability (dry-year vs wet-year fire seasons, ENSO effects) still needs
@@ -744,7 +765,8 @@ layer before redistributing derivatives, and cite year, scale and holder.
    2026-08-30) to five magnitude constants with no solid primary source for
    Colombia, swept as a range rather than fixed at a single unverified
    value: the requirement[f] calibration constants A0 (initial fire area,
-   roughly 1-30 ha) and c (liters per square meter to control, roughly
+   0.1-14 ha, center 1 ha, re-anchored 2026-09-12 alongside the units fix,
+   section 3) and c (liters per square meter to control, roughly
    1.5-10 L/m^2), ros_scale (overall rate-of-spread magnitude, section
    5.3), and cost_base[i]/cost_water[k] (candidate site costs, roughly 300
    million-6,000 million COP per base and 15 million-300 million COP per
@@ -1260,6 +1282,70 @@ not to be silently resolved:
   for the final version, stated as ongoing work in the manuscript
   itself: SAA replication with gap/CI, experiment 5, and measuring
   the multi-aircraft integrated-vs-sequential gap.
+
+- Full-repo review 2026-09-12 (external-referee-style pass over the
+  formulation, code, manuscript and references; user-approved fixes,
+  option "(a) corregir x10.000 y re-anclar"). Four consequential
+  findings, all acted on the same day:
+  1. UNITS BUG, requirement[f] (CRITICAL): A0 is hectares user-facing,
+     c is L/m^2, and precompute.py multiplied them with no ha-to-m^2
+     conversion, so requirement was 10,000x too small (tens of liters
+     vs a 3,785 L tank) and containment reduced to "reach the fire for
+     one cycle" in every earlier real-data run. Fixed in
+     src/model/precompute.py (SQM_PER_HECTARE, single conversion
+     point); hand-verified tests updated (0.01 ha = 100 m^2 keeps every
+     derived number identical); A0 re-anchored (section 3): center
+     1 ha, sweep 0.1-14 ha (NWCG size classes A/B low anchors, one
+     VIIRS 375 m pixel top anchor), replacing the 5 ha center / 1-30 ha
+     sweep chosen while the bug made the axis inert. CONSEQUENCE: every
+     results/*.csv produced before this date used the broken
+     requirement; experiments 1, 2, 3 (all budget probes), 4 and 6
+     re-run from scratch this date, and the pre-fix experiment 6
+     insensitivity finding (window/A0/c/ros_scale all flat) must not be
+     cited from the old CSVs, it was largely an artifact of the bug.
+  2. Manuscript section 6.2's "cross-check at real scale" paragraph
+     (73.847 at full catalog) was insupportable: that number came from
+     the 2026-09-04 pre-fix, pre-DECIDED-parameters runs, under which
+     regime experiment 2's own CSV shows direct Gurobi reaching 0.0 at
+     the 20:50 truncation, strictly better, i.e. the full-catalog
+     matheuristic run had converged to a suboptimum (the documented
+     174 km trap). Full-catalog runs redone under DECIDED parameters
+     with random_destroy_prob=0.3, and the paragraph rewritten to
+     match; results/experiment2_matheuristic_vs_gurobi.csv regenerated
+     post-fix (the committed one was stale/pre-fix).
+  3. Citation year error: Kleywegt, Shapiro and Homem-de-Mello is SIAM
+     J. Optimization 12(2):479-502, year 2002, not 2001 (verified
+     against the SIAM/ACM record 2026-09-12; the 2026-07-23
+     verification pass above recorded 2001 in error). references.bib
+     corrected; bib key kleywegt2001 kept.
+  4. Detection counts did not reproduce: the recorded "4689 raw
+     detections, 2413 events" could not be reproduced from the raw
+     chunk CSVs with the committed pipeline (actual: 4,719 raw ->
+     4,470 cleaned -> 2,425 events, 4,470 clustered detections).
+     events_2024-full.csv and scenarios_2024full.json regenerated end
+     to end from the raw files (bootstrap seed 0 verified to redraw the
+     exact same 200 source dates; first-10-scenario fire count stays
+     81, first-2 stays 15); the manuscript's numbers updated to the
+     reproducible chain.
+  Also from the same review, disclosure items added to the manuscript
+  rather than code changes: the window/t_arrival two-clock
+  reconciliation (drops charges the full positioning leg against W
+  from dispatch, while requirement[f] is assessed at the earliest
+  feasible attack time min_i t_base_fire; two different clocks for two
+  different purposes, now stated explicitly), the arrive-empty
+  first-cycle assumption (no +1 drop for departing loaded, no
+  base-to-water-to-fire first leg), no water-point capacity or
+  congestion (matters exactly in multi-aircraft regimes), single
+  loaded/unloaded speed, no per-flight operating cost in the
+  objective, the ST-DBSCAN continuous-temporal-Eps2 adaptation
+  disclosure the code docstring had promised the methods section, the
+  non-parsimonious water-open counts under slack budget (cost_water
+  binds only the budget, so open-water counts in solutions are
+  alternate-optimal noise, never a finding), and t_arrival being
+  recomputed over each experiment's truncated base subset.
+  solve_sequential_best_phi also made tolerant of a failed phi (skips
+  it instead of losing the sweep). Re-run results recorded below once
+  finished, same date.
 
 ## 11. Citation discipline [FROZEN]
 

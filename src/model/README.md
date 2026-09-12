@@ -84,7 +84,7 @@ user's own real decision for any actual experiment, CLAUDE.md section
 ```bash
 python -m src.model.run_instance \
     --max-bases 3 --max-water-points 3 --max-scenarios 2 \
-    --ros-scale 1.0 --initial-fire-area 5.0 --liters-per-sqm 3.0 \
+    --ros-scale 1.0 --initial-fire-area 1.0 --liters-per-sqm 3.0 \
     --cost-base 1000000000 --cost-water 50000000 \
     --budget 100000000000 --cvar-alpha 0.95 --mean-risk-weight 0.5 --window 8.0 \
     --illustrative-smoke-test --solver gurobi

@@ -107,7 +107,7 @@ is intractable for it, see that module's own docstring).
 
 Two runs, same illustrative smoke-test parameters as
 `src/model/README.md`'s own `run_instance.py` example (`--ros-scale 1.0
---initial-fire-area 5.0 --liters-per-sqm 3.0 --cost-base 1e9 --cost-water
+--initial-fire-area 1.0 --liters-per-sqm 3.0 --cost-base 1e9 --cost-water
 5e7 --budget 1e11 --cvar-alpha 0.95 --mean-risk-weight 0.5 --window 8.0`):
 
 1. `--max-scenarios 2` (15 fires), `n_bases_per_neighborhood=5`,

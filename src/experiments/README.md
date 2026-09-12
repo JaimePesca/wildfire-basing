@@ -85,7 +85,7 @@ budget/cvar-alpha/mean-risk-weight/window default to the DECIDED
 python -m src.experiments.experiment2_matheuristic_vs_gurobi \
     --instance-sizes 5:10 10:25 20:50 \
     --max-scenarios 2 \
-    --ros-scale 1.0 --initial-fire-area 5.0 --liters-per-sqm 3.0 \
+    --ros-scale 1.0 --initial-fire-area 1.0 --liters-per-sqm 3.0 \
     --cost-base 1000000000 --cost-water 50000000 \
     --illustrative-smoke-test
 ```

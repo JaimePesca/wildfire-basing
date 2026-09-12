@@ -64,15 +64,15 @@ def fig_study_area() -> None:
     km = 1e-3
     ax.scatter(
         water["x_utm"] * km, water["y_utm"] * km, s=2, c=LIGHTGRAY,
-        linewidths=0, label="Candidate water points (5,449)", rasterized=True,
+        linewidths=0, label=f"Candidate water points ({len(water):,})", rasterized=True,
     )
     ax.scatter(
         events["x_utm"] * km, events["y_utm"] * km, s=4, c=VERMILLION, alpha=0.45,
-        linewidths=0, label="Fire events 2024 (2,413)", rasterized=True,
+        linewidths=0, label=f"Fire events 2024 ({len(events):,})", rasterized=True,
     )
     ax.scatter(
         bases["x_utm"] * km, bases["y_utm"] * km, s=28, c=BLUE, marker="^",
-        edgecolors="white", linewidths=0.4, label="Candidate bases (120)",
+        edgecolors="white", linewidths=0.4, label=f"Candidate bases ({len(bases)})",
     )
     ax.set_xlabel("Easting, km (EPSG:9377)")
     ax.set_ylabel("Northing, km (EPSG:9377)")

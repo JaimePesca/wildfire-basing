@@ -187,10 +187,24 @@ def solve_sequential_best_phi(
     """Sweep the budget split and return (best sequential result, all of
     them). "Best" is the lowest phase B objective among splits whose
     phase B solved to optimality; raises ValueError if none did. This is
-    the best-case sequential planner experiment 3 compares against."""
-    results = [solve_sequential(params, phi, solver_factory) for phi in phis]
+    the best-case sequential planner experiment 3 compares against.
+
+    A phi whose phase A fails to solve to optimality (e.g. a time-limited
+    solver cutting a hard phase A short) is SKIPPED, not fatal: the sweep
+    still reports the best split among the ones that did solve, rather
+    than losing the whole sweep to one bad split (robustness fix,
+    2026-09-12; the per-phi ValueError from solve_sequential is preserved
+    for direct callers)."""
+    results: list[SequentialResult] = []
+    skipped: list[str] = []
+    for phi in phis:
+        try:
+            results.append(solve_sequential(params, phi, solver_factory))
+        except ValueError as exc:
+            skipped.append(f"phi={phi}: {exc}")
     solved = [r for r in results if r.phase_b.status == "Optimal"]
     if not solved:
-        raise ValueError("no phi produced an optimal phase B solve")
+        detail = ("; skipped: " + " | ".join(skipped)) if skipped else ""
+        raise ValueError("no phi produced an optimal phase B solve" + detail)
     best = min(solved, key=lambda r: r.objective_value)
     return best, results

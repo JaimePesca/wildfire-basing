@@ -84,8 +84,8 @@ def _base_case(budget: float, both_bases: bool = True) -> ModelParams:
         ops_time=0.0,
         cvar_alpha=0.95,
         mean_risk_weight=0.0,  # risk neutral: objective = sum_s p_s * loss[s]
-        initial_fire_area=100.0,
-        liters_per_sqm=1.0,  # requirement = 1.0 * 100.0 * exp(0*1.0) = 100.0
+        initial_fire_area=0.01,  # hectares: 0.01 ha = 100 m^2
+        liters_per_sqm=1.0,  # requirement = 1.0 * (0.01 ha * 10,000 m^2/ha) * exp(0*1.0) = 100.0
         cost_base={i: cost_base[i] for i in bases},
         cost_aircraft={"T1": 1000.0},
         cost_water={"W1": 3000.0},
@@ -149,7 +149,7 @@ def test_fire_escapes_when_no_base_is_within_the_window(solver_factory):
         ops_time=0.0,
         cvar_alpha=0.95,
         mean_risk_weight=0.0,
-        initial_fire_area=100.0,
+        initial_fire_area=0.01,  # hectares: 0.01 ha = 100 m^2
         liters_per_sqm=1.0,
         cost_base={"B_far": 5000.0},
         cost_aircraft={"T1": 1000.0},
@@ -182,7 +182,7 @@ def test_scenario_with_no_fires_builds_and_solves(solver_factory):
         ops_time=0.0,
         cvar_alpha=0.95,
         mean_risk_weight=0.0,
-        initial_fire_area=100.0,
+        initial_fire_area=0.01,  # hectares: 0.01 ha = 100 m^2
         liters_per_sqm=1.0,
         cost_base={"B1": 5000.0},
         cost_aircraft={"T1": 1000.0},
@@ -241,7 +241,7 @@ def test_cvar_matches_hand_derivation_for_two_equally_likely_scenarios(solver_fa
         ops_time=0.0,
         cvar_alpha=0.5,
         mean_risk_weight=1.0,  # pure CVaR
-        initial_fire_area=100.0,
+        initial_fire_area=0.01,  # hectares: 0.01 ha = 100 m^2
         liters_per_sqm=1.0,
         cost_base={"B_near": 5000.0},
         cost_aircraft={"T1": 1000.0},
@@ -289,7 +289,7 @@ def test_build_model_rejects_scenario_probabilities_not_summing_to_one():
         ops_time=0.0,
         cvar_alpha=0.95,
         mean_risk_weight=0.5,
-        initial_fire_area=100.0,
+        initial_fire_area=0.01,  # hectares: 0.01 ha = 100 m^2
         liters_per_sqm=1.0,
         cost_base={"B_near": 5000.0},
         cost_aircraft={"T1": 1000.0},
