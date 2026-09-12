@@ -27,13 +27,14 @@ Standard replication scheme \\citep[in the sense of][]{kleywegt2001}:
 4. Report gap = UB - LB with the CI components.
 
 Honest statistical caveats, printed with the results rather than
-hidden: with a CVaR term in the objective the classical lower-bound
-argument carries additional small-sample bias (the sample CVaR is
-itself downward biased for minimization), and the CVaR component of
-the upper bound is reported as a point estimate (its CI is not a
-simple t interval); the expectation components carry standard t
-intervals. With N' = 100 equiprobable evaluation scenarios,
-CVaR_0.95 averages the worst five losses.
+hidden: the sample CVaR inside the objective is downward biased in
+small samples, which makes the statistical lower bound LOOSER but
+does not invalidate it (E[v_N] <= v* still holds; the bias direction
+reinforces validity, wording sharpened 2026-09-12 after peer review);
+the CVaR component of the upper bound is reported as a point estimate
+(its CI is not a simple t interval); the expectation components carry
+standard t intervals. With N' = 100 equiprobable evaluation
+scenarios, CVaR_0.95 averages the worst five losses.
 
 Same disclosures as the other src/experiments scripts (swept
 sensitivity parameters fixed at one sweep point, DECIDED defaults for
@@ -285,8 +286,9 @@ def main() -> None:
     gap = ub_objective - lb_mean
     gap_rel = gap / ub_objective if ub_objective else float("nan")
     print(f"\nEstimated optimality gap: {gap:.3f} ({100 * gap_rel:.2f}% of the UB)")
-    print("Caveats: the CVaR term biases the SAA lower bound downward in small samples, and the "
-          "CVaR component of the UB is a point estimate; expectation components carry t-CIs.")
+    print("Caveats: the sample-CVaR term is downward biased in small samples, which keeps the "
+          "statistical lower bound VALID but looser (E[v_N] <= v* still holds); the CVaR component "
+          "of the UB is a point estimate; expectation components carry t-CIs.")
 
     with open(args.output_csv, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
