@@ -729,7 +729,17 @@ layer before redistributing derivatives, and cite year, scale and holder.
 2. Matheuristic vs pure Gurobi.
 3. Integrated vs sequential (the star experiment).
 4. Expectation vs CVaR.
-5. Optimal vs current Colombian infrastructure.
+5. Optimal vs current Colombian infrastructure. DROPPED 2026-09-12 by
+   user decision ("Descartemos el experimento 5. Trabajemos con lo que
+   ya tenemos"): the original definition needs a current-infrastructure
+   catalog that does not exist in-repo (IDECA/DNBC ground stations are
+   tangential to aerial basing, and Colombia's current aerial wildfire
+   capability is largely the not-yet-based Firehawk acquisition itself,
+   making "current" ill-defined); a zero-new-data reformulation
+   ("optimal vs default basing at CACOM-4 Melgar, already in the
+   candidate catalog") was designed and offered, and the user chose to
+   drop the experiment entirely rather than pursue either version. The
+   manuscript makes no promise about it.
 6. Sensitivity to budget, and (added 2026-08-18, extended 2026-08-21 and
    2026-08-30) to five magnitude constants with no solid primary source for
    Colombia, swept as a range rather than fixed at a single unverified

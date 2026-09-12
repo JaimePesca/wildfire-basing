@@ -127,13 +127,24 @@ iteration budget; treat any single real run's quality gap as informative,
 not as evidence the matheuristic is broken or that random_destroy_prob=0.3
 is sufficient at every scale, until a real tuning sweep is done.
 
+## saa_replication.py
+
+Closes CLAUDE.md section 3's promise ("SAA reported with optimality
+gap and confidence interval"): M independent bootstrap replications
+from the real 2024 day pool give a statistical lower bound (mean of
+proven optima, t-CI; timed-out replications are excluded with
+disclosure, not silently included), a pre-registered candidate
+first-stage solution is evaluated on an independent N'-scenario sample
+(one small fixed-first-stage recourse MILP per scenario, losses
+aggregated into the mean-risk objective via src/model/risk.py), and
+the gap is reported with its CI components. The CVaR small-sample
+caveats are printed with the results, not hidden.
+
 ## Not yet done
 
-- Experiment 5 (CLAUDE.md section 9) has no script yet; it also needs
-  the current-infrastructure catalog (IDECA/DNBC, CLAUDE.md section 8)
-  built first.
-- SAA optimality gap and confidence interval reporting (CLAUDE.md
-  section 3 promises it; no script exists yet).
+- Experiment 5: DROPPED 2026-09-12 by user decision (CLAUDE.md
+  section 9), no new data collection; the manuscript makes no promise
+  about it.
 - A systematic instance-size sweep large enough to show pure Gurobi's
   runtime actually blow up (CLAUDE.md's own framing of experiment 2's
   point) has not been run; only small smoke-test sizes so far.
