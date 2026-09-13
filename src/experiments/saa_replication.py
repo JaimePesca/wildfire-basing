@@ -16,14 +16,17 @@ Standard replication scheme \\citep[in the sense of][]{kleywegt2001}:
    the lower-bound estimate and reported separately (their incumbents
    are upper bounds on their own v_N, so including them would bias the
    LB upward silently; exclusion is disclosed instead).
-3. Fix one candidate first-stage solution x_hat (the first
-   replication's optimal solution, a pre-registered choice made before
-   seeing any evaluation result, to avoid selection bias) and evaluate
-   it on the N' independent evaluation scenarios, one small recourse
-   MILP per scenario with every first-stage variable fixed. The
-   evaluated mean-risk objective (expectation plus empirical CVaR over
-   the N' losses, src/model/risk.py) estimates an upper bound on the
-   true value of x_hat, hence on the true optimum's achievable value.
+3. Evaluate EVERY replication's optimal first-stage solution on the N'
+   independent evaluation scenarios (one small recourse MILP per
+   scenario and candidate, with every first-stage variable fixed), and
+   select the candidate with the best evaluated mean-risk objective,
+   the standard SAA candidate-selection step. Because selecting the
+   minimum of M evaluated values on the SAME sample introduces a small
+   optimistic selection bias, the WINNER is then re-evaluated on a
+   SECOND, fresh, independent sample of the same size (its own seed),
+   and that fresh evaluation is the reported upper bound (the
+   pre-registered first-replication candidate's evaluation is also
+   reported, for comparability with the naive protocol).
 4. Report gap = UB - LB with the CI components.
 
 Honest statistical caveats, printed with the results rather than
@@ -144,6 +147,11 @@ def main() -> None:
     parser.add_argument("--n-eval", type=int, default=100, help="N', independent evaluation scenarios.")
     parser.add_argument("--seed-base", type=int, default=1, help="Replication m uses seed seed_base + m.")
     parser.add_argument("--eval-seed", type=int, default=999)
+    parser.add_argument(
+        "--fresh-eval-seed", type=int, default=998,
+        help="Seed for the second, fresh evaluation sample used to re-evaluate the selected winner "
+        "without selection bias (must differ from eval-seed and the replication seeds).",
+    )
     parser.add_argument("--worldcover-tiles", nargs="+", default=DEFAULT_WORLDCOVER_TILES)
     parser.add_argument("--srtm-tiles", nargs="+", default=DEFAULT_SRTM_TILES)
     parser.add_argument("--worldpop-raster", default=DEFAULT_WORLDPOP_RASTER)
@@ -185,12 +193,13 @@ def main() -> None:
         for m in range(args.n_replications)
     ]
     eval_draw = bootstrap_scenarios(pool, args.n_eval, np.random.default_rng(args.eval_seed))
+    fresh_draw = bootstrap_scenarios(pool, args.n_eval, np.random.default_rng(args.fresh_eval_seed))
 
     # One enrichment pass over the union: FireRecord instances are shared
     # between scenarios drawn from the same pool, so ros/value_at_risk are
     # computed once per unique event, and the wind query cache in
     # weather.py deduplicates live NASA POWER calls within the call.
-    all_scenarios = [s for draw in replication_draws for s in draw] + eval_draw
+    all_scenarios = [s for draw in replication_draws for s in draw] + eval_draw + fresh_draw
     n_fires_total = sum(len(s.fires) for s in all_scenarios)
     print(f"Enriching {n_fires_total} fire slots across {len(all_scenarios)} scenarios (shared events computed once)...")
     enrich_scenarios_with_ros_and_value_at_risk(
@@ -205,7 +214,7 @@ def main() -> None:
     # ---- Lower bound: M independent SAA optima --------------------------
     rep_rows = []
     optima = []
-    candidate_first_stage = None
+    candidates: list[tuple[int, tuple]] = []  # (replication index, first stage)
     for m, draw in enumerate(replication_draws):
         model_scenarios, dropped = to_model_scenarios(draw, on_missing="drop")
         if dropped:
@@ -231,14 +240,11 @@ def main() -> None:
         )
         if not timed.timed_out and timed.solution.status == "Optimal":
             optima.append(timed.solution.objective_value)
-            if candidate_first_stage is None:
-                candidate_first_stage = (
-                    timed.solution.base_open,
-                    timed.solution.water_open,
-                    timed.solution.n_aircraft,
-                )
+            candidates.append(
+                (m, (timed.solution.base_open, timed.solution.water_open, timed.solution.n_aircraft))
+            )
 
-    if len(optima) < 2 or candidate_first_stage is None:
+    if len(optima) < 2 or not candidates:
         raise SystemExit("fewer than two replications solved to proven optimality; no LB/candidate available.")
 
     lb_mean = statistics.mean(optima)
@@ -248,64 +254,95 @@ def main() -> None:
     print(f"\nLower bound: mean of {len(optima)} proven optima = {lb_mean:.3f} +- {lb_half:.3f} (95% t-CI)"
           + (f"; {n_excluded} timed-out replication(s) excluded, disclosed" if n_excluded else ""))
 
-    # ---- Upper bound: evaluate x_hat on the independent sample ----------
-    print(f"\nEvaluating the candidate first-stage solution on {args.n_eval} independent scenarios...")
-    losses = []
+    # ---- Candidate evaluation on independent samples ---------------------
+    import dataclasses as _dc
+
+    def evaluate_on(first_stage, draw) -> list[float]:
+        """Per-day recourse losses of a fixed first-stage solution over a
+        scenario draw: one small MILP per scenario with every first-stage
+        variable fixed. lambda is set to 0 per solve because, with the
+        first stage fixed and a single scenario, the loss-minimizing
+        recourse is identical for any lambda (the CVaR of a point mass
+        is the loss itself)."""
+        losses: list[float] = []
+        for j, scen in enumerate(draw):
+            model_scenarios, _dropped = to_model_scenarios([scen], on_missing="drop")
+            one = _dc.replace(model_scenarios[0], probability=1.0)
+            eval_args = argparse.Namespace(**vars(args))
+            eval_args.mean_risk_weight = 0.0
+            params = _assemble(bases, water_points, [one], eval_args)
+            pre = precompute(params)
+            model, v = build_model(params, pre)
+            _fix_first_stage(v, params, first_stage)
+            status = solve(model, solver=pulp.GUROBI(msg=False))
+            if status != "Optimal":
+                raise SystemExit(f"evaluation scenario {j} did not solve: {status}")
+            losses.append(sum(pulp.value(var) or 0.0 for var in v.loss.values()))
+        return losses
+
+    def mean_risk_of(losses: list[float]) -> tuple[float, float, float, float]:
+        dist = [(loss, 1.0 / len(losses)) for loss in losses]
+        e = expected_loss(dist)
+        cv = empirical_cvar(dist, alpha=args.cvar_alpha)
+        obj = (1 - args.mean_risk_weight) * e + args.mean_risk_weight * cv
+        half = t_crit(len(losses) - 1) * statistics.stdev(losses) / math.sqrt(len(losses))
+        return e, cv, obj, half
+
+    print(f"\nEvaluating all {len(candidates)} candidate solutions on {args.n_eval} independent scenarios...")
     t0 = time.perf_counter()
-    for j, scen in enumerate(eval_draw):
-        model_scenarios, dropped = to_model_scenarios([scen], on_missing="drop")
-        one = model_scenarios[0]
-        # A single-scenario evaluation needs probability 1 and, with the
-        # first stage fixed, the recourse minimizing loss is identical for
-        # any lambda (the CVaR of a point mass is the loss itself), so
-        # lambda is set to 0 for a clean per-day loss read-out.
-        import dataclasses as _dc
-
-        one = _dc.replace(one, probability=1.0)
-        eval_args = argparse.Namespace(**vars(args))
-        eval_args.mean_risk_weight = 0.0
-        params = _assemble(bases, water_points, [one], eval_args)
-        pre = precompute(params)
-        model, v = build_model(params, pre)
-        _fix_first_stage(v, params, candidate_first_stage)
-        status = solve(model, solver=pulp.GUROBI(msg=False))
-        if status != "Optimal":
-            raise SystemExit(f"evaluation scenario {j} did not solve: {status}")
-        losses.append(sum(pulp.value(var) or 0.0 for var in v.loss.values()))
+    evaluated = []
+    for m, first_stage in candidates:
+        e, cv, obj, half = mean_risk_of(evaluate_on(first_stage, eval_draw))
+        evaluated.append({"replication": m, "eval_expectation": e, "eval_cvar": cv,
+                          "eval_mean_risk": obj, "eval_expectation_ci_half": half})
+        print(f"  candidate from replication {m}: E[loss]={e:.3f} CVaR={cv:.3f} mean-risk={obj:.3f}")
     eval_time = time.perf_counter() - t0
+    print(f"  ({eval_time:.1f}s total)")
 
-    dist = [(loss, 1.0 / len(losses)) for loss in losses]
-    ub_expectation = expected_loss(dist)
-    ub_cvar = empirical_cvar(dist, alpha=args.cvar_alpha)
-    ub_objective = (1 - args.mean_risk_weight) * ub_expectation + args.mean_risk_weight * ub_cvar
-    exp_sd = statistics.stdev(losses)
-    exp_half = t_crit(len(losses) - 1) * exp_sd / math.sqrt(len(losses))
-    print(f"  evaluated in {eval_time:.1f}s: E[loss] = {ub_expectation:.3f} +- {exp_half:.3f} (95% t-CI), "
-          f"CVaR_{args.cvar_alpha} = {ub_cvar:.3f} (point estimate), mean-risk UB = {ub_objective:.3f}")
+    naive = evaluated[0]  # the pre-registered first-replication candidate
+    winner = min(evaluated, key=lambda r: r["eval_mean_risk"])
+    winner_first_stage = dict(candidates)[winner["replication"]]
 
-    gap = ub_objective - lb_mean
-    gap_rel = gap / ub_objective if ub_objective else float("nan")
-    print(f"\nEstimated optimality gap: {gap:.3f} ({100 * gap_rel:.2f}% of the UB)")
+    print(f"\nSelected candidate: replication {winner['replication']} "
+          f"(selection sample mean-risk {winner['eval_mean_risk']:.3f}); re-evaluating on a fresh "
+          f"independent sample of {args.n_eval} scenarios (selection-bias control)...")
+    fe, fcv, fobj, fhalf = mean_risk_of(evaluate_on(winner_first_stage, fresh_draw))
+    print(f"  fresh evaluation: E[loss] = {fe:.3f} +- {fhalf:.3f} (95% t-CI), "
+          f"CVaR_{args.cvar_alpha} = {fcv:.3f} (point estimate), mean-risk UB = {fobj:.3f}")
+
+    gap = fobj - lb_mean
+    gap_rel = gap / fobj if fobj else float("nan")
+    naive_gap = naive["eval_mean_risk"] - lb_mean
+    print(f"\nEstimated optimality gap (selected candidate, fresh sample): {gap:.3f} "
+          f"({100 * gap_rel:.2f}% of the UB)")
+    print(f"For comparison, the naive pre-registered candidate's gap on the selection sample: "
+          f"{naive_gap:.3f} ({100 * naive_gap / naive['eval_mean_risk']:.2f}% of its UB)")
     print("Caveats: the sample-CVaR term is downward biased in small samples, which keeps the "
           "statistical lower bound VALID but looser (E[v_N] <= v* still holds); the CVaR component "
-          "of the UB is a point estimate; expectation components carry t-CIs.")
+          "of the UB is a point estimate; expectation components carry t-CIs; the winner's UB comes "
+          "from a fresh sample precisely so the min-of-M selection cannot flatter it.")
 
     with open(args.output_csv, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
-        writer.writerow(rep_rows[0].keys())
+        eval_by_rep = {r["replication"]: r for r in evaluated}
+        header = list(rep_rows[0].keys()) + ["eval_expectation", "eval_cvar", "eval_mean_risk"]
+        writer.writerow(header)
         for r in rep_rows:
-            writer.writerow(r.values())
+            ev = eval_by_rep.get(r["replication"], {})
+            writer.writerow(list(r.values()) + [ev.get("eval_expectation"), ev.get("eval_cvar"),
+                                                ev.get("eval_mean_risk")])
     summary_path = args.output_csv.replace(".csv", "_summary.csv")
     with open(summary_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(
             ["n_replications", "n_proven", "n_scenarios", "n_eval", "lb_mean", "lb_ci_half",
-             "ub_expectation", "ub_expectation_ci_half", "ub_cvar_point", "ub_mean_risk",
-             "gap", "gap_rel"]
+             "selected_replication", "ub_expectation", "ub_expectation_ci_half", "ub_cvar_point",
+             "ub_mean_risk", "gap", "gap_rel", "naive_ub_mean_risk", "naive_gap"]
         )
         writer.writerow(
             [args.n_replications, len(optima), args.n_scenarios, args.n_eval, lb_mean, lb_half,
-             ub_expectation, exp_half, ub_cvar, ub_objective, gap, gap_rel]
+             winner["replication"], fe, fhalf, fcv, fobj, gap, gap_rel,
+             naive["eval_mean_risk"], naive_gap]
         )
     print(f"\nWrote {args.output_csv} and {summary_path}")
 
