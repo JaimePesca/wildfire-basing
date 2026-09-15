@@ -24,45 +24,46 @@
 Location Problem: Joint Siting under Uncertainty with an Application to
 Cundinamarca, Colombia}
 
-% TODO(user): confirm author name, affiliation and email before submission.
-\author{Jaime E. Pesca S.\\
-\small Universidad de La Sabana, Ch{\'i}a, Colombia}
+\author{Jaime Enrique Pesca Santos\thanks{Corresponding author:
+jaime.pesca@uexternado.edu.co}\\
+\small Facultad de Administraci{\'o}n de Empresas, Universidad
+Externado de Colombia, Bogot{\'a}, Colombia
+\and
+Kiana Hikaru Ysa Morla\thanks{kiana.ysa@utec.edu.pe}\\
+\small Universidad de Ingenier{\'i}a y Tecnolog{\'i}a (UTEC), Lima,
+Peru}
 
-\date{Draft of 11 September 2026}
+\date{Draft of 13 September 2026}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-Aerial wildfire suppression productivity is governed by a three-leg
-cycle: an aircraft positions once from its base to the fire, then
-repeats the fire-to-water refill leg on every drop. The refill leg is
-paid on every cycle, so water point location, not base-to-fire distance
-alone, drives how much water a fire actually receives. We introduce the
+Aerial suppression productivity is governed by a three-leg cycle: an
+aircraft positions once from base to fire, then repeats the
+fire-to-water refill leg on every drop, so water point location, not
+base-to-fire distance alone, drives delivered water. We introduce the
 cycle-constrained aerial suppression base and water point location
-problem, the first model to site aerial bases and water refill points
-jointly, with aircraft productivity endogenous to the refill cycle,
-within a two-stage stochastic program whose objective is a mean-risk
-combination of expected loss and conditional value-at-risk. The
-bilinear dispatch and refill coupling admits an exact big-M
-linearization, and a fix-and-optimize matheuristic with large
-neighborhood search over the first-stage variables makes the full
-candidate catalog tractable. We build a fully sourced case study for
-Cundinamarca, Colombia, from open data: 2,413 fire events clustered
-from satellite detections of calendar year 2024, 120 candidate bases,
-5,449 candidate water points, and the Sikorsky S-70i Firehawk that
-Colombia is acquiring. Three findings stand out. First, under the real
-program budget the system is fleet-limited: the optimal objective is
-insensitive to fire growth constants, site costs, and the suppression
-window across their entire plausible ranges, while the number of
-affordable aircraft dominates. Second, a best-case sequential planner
-(bases first, water second) matches the integrated optimum in
-single-aircraft regimes, and we characterize structurally why; the
-integrated model's value concentrates where fleets grow or water
-becomes the binding margin. Third, the direct mixed-integer program
-hits a tractability cliff precisely in those multi-aircraft regimes,
-which the matheuristic crosses at negligible cost.
+problem, the first to site bases and water refill points jointly with
+cycle-endogenous productivity, as a two-stage mean-risk (CVaR)
+stochastic program with an exact linearization and a fix-and-optimize
+matheuristic whose reduced subproblems are exact. An open-data case
+study for Cundinamarca, Colombia, built around the country's Firehawk
+acquisition, shows a fleet-limited-first, physics-limited-second
+regime: budget dominates, uncalibrated growth constants act as a
+containability cliff, sequential bases-first planning matches the
+integrated optimum wherever certification is possible, and
+tractability collapses exactly where fleets and budget slack grow,
+which the matheuristic crosses.
 \end{abstract}
+
+\medskip
+\begin{sloppypar}
+\noindent\textbf{Keywords:} wildfire suppression; facility location;
+aerial firefighting; water refill points; two-stage stochastic
+programming; conditional value-at-risk; sample average approximation;
+matheuristics; Colombia.
+\end{sloppypar}
 
 \section{Introduction}
 \label{sec:intro}
@@ -87,10 +88,10 @@ water is dominated by the fire-to-water leg, which is paid on every
 cycle, not by the base-to-fire leg, which is paid once. Aircraft
 productivity is therefore endogenous to the joint configuration of
 bases and water points. A classical facility location model built on
-base-to-fire distance alone, of the p-median family, cannot represent
-this tradeoff, and, as Section~\ref{sec:lit} shows, no existing model
-sites bases and water points jointly with cycle-endogenous
-productivity.
+base-to-fire distance alone, of the p-median family
+\citep{hakimi1964}, cannot represent this tradeoff, and, as
+Section~\ref{sec:lit} shows, no existing model sites bases and water
+points jointly with cycle-endogenous productivity.
 
 This paper makes four contributions. First, we formulate the
 cycle-constrained aerial suppression base and water point location
@@ -130,17 +131,20 @@ an assumption and swept in the sensitivity analysis.
 
 Fourth, our computational study yields policy-relevant structural
 findings rather than only benchmark numbers. Under the real program
-budget the deployment is fleet-limited: one Firehawk absorbs half the
-budget, at most one fire per day-scenario can be served, and the
-optimal objective is flat across the entire plausible ranges of fire
-growth constants, site costs, and the suppression window, while budget
-(the number of affordable aircraft) moves it strongly. A best-case
-sequential planner that sites bases first and water second matches the
-integrated optimum in every single-aircraft configuration we tested,
-and we explain structurally why; conversely, the direct MILP hits a
-tractability cliff exactly where the integrated question becomes
-interesting, in multi-aircraft regimes, which the matheuristic crosses
-in seconds.
+budget the deployment is fleet-limited first and physics-limited
+second: one Firehawk absorbs half the budget and serves at most one
+fire per day-scenario, budget moves the objective most, and the
+uncalibrated containment constants act as a containability cliff
+that decides whether that aircraft buys anything at all, while site
+costs never move the objective across their documented ranges. A
+best-case sequential planner that sites bases first and water second
+matches the integrated optimum in every configuration we can
+certify, one and two aircraft alike, and the strongest integrated
+search available finds nothing better where certification fails; we
+explain structurally why. Conversely, the direct MILP loses
+tractability exactly where the integrated question becomes
+interesting, in multi-aircraft, high-budget-slack regimes, which is
+what motivates the matheuristic.
 
 The remainder of the paper is organized as follows.
 Section~\ref{sec:lit} reviews the literature and states the gap.
@@ -160,7 +164,9 @@ models for one-strike initial attack, and \citet{maclellan1996} based
 airtankers for Ontario with an expected-cost model over historical
 demand. Modern strategic deployment models keep this base-side focus:
 \citet{skold2024} locate aerial firefighting resources in Sweden with a
-binary program over wildfire risk data. Stochastic treatments deploy
+binary program over wildfire risk data, and \citet{mendes2023} place
+wildland fire suppression resources on a landscape with mixed-integer
+programming and iterated local search. Stochastic treatments deploy
 suppression resources across existing stations under fire-occurrence
 uncertainty: the scenario-based standard-response models of
 \citet{haight2007}, the simulation plus stochastic integer programming
@@ -307,7 +313,7 @@ $\tau^{\mathrm{bf}}_{if}$, $\tau^{\mathrm{fw}}_{fk}$ &
 one-way base-to-fire and fire-to-water travel times, hours \\
 $D_f$ & value at risk of fire $f$ (population exposure) \\
 $\rho_f$ & rate-of-spread parameter of fire $f$ \\
-$t^{\mathrm{arr}}_f$ & detection-to-window arrival time of fire $f$, hours \\
+$t^{\mathrm{arr}}_f$ & earliest-attack arrival time of fire $f$, hours (Section 3.2) \\
 $A_0$, $c$ & initial fire area and liters per square meter to control \\
 $\alpha$, $\lambda$ & CVaR confidence level and mean-risk weight \\
 \midrule
@@ -640,12 +646,19 @@ search practice \citep{ropke2006}, each iteration is therefore, with
 probability $\pi$, a random destroy that frees sites drawn uniformly
 from the whole catalog; unit tests reproduce the trap instance and
 confirm the random operator escapes it reliably across seeds. A
-parameter sweep on a real instance with a known optimum (24
-configurations, five seeds each) found quality saturated at the
-base case, all configurations reached the optimum, so neighborhood
-sizes are chosen for runtime (five bases, ten water points per
-iteration) and $\pi = 0.3$ is retained as insurance against the
-documented trap regime.
+parameter sweep on the base-case instance with a known optimum (24
+configurations, five seeds each, 100 iterations, early stopping
+disabled so reliability is not confounded with patience)
+discriminates sharply: pure geographic destroy missed the optimum in
+three of its six configurations (hit rates 0.6 to 0.8, one run
+stalling far above the optimum), while configurations with destroy
+probability 0.2 or higher reached it in 89 of 90 runs. Reliability,
+not only the synthetic trap, mandates the random operator. Since
+every mixed configuration attains the optimum, neighborhood sizes
+are chosen for runtime, five bases and ten water points per
+iteration, the fastest reliable configuration at about 22 seconds
+per 100-iteration run, and $\pi = 0.3$ sits inside the reliable
+band.
 
 \section{Computational study}
 \label{sec:experiments}
@@ -689,9 +702,9 @@ Objectives are identical to solver precision at every size.}
 \toprule
 $|I|$ & $|K|$ & MILP obj. & MILP s & Bilinear obj. & Bilinear s & Match \\
 \midrule
-3 & 5  & 73.847 & 0.03 & 73.847 & 0.02 & yes \\
-5 & 10 & 73.847 & 0.09 & 73.847 & 0.05 & yes \\
-8 & 15 & 73.847 & 0.22 & 73.847 & 0.16 & yes \\
+3 & 5  & 8576.834 & 0.02 & 8576.834 & 0.02 & yes \\
+5 & 10 & 8576.834 & 0.11 & 8576.834 & 0.10 & yes \\
+8 & 15 & 8576.834 & 0.39 & 8576.834 & 0.29 & yes \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -699,46 +712,66 @@ $|I|$ & $|K|$ & MILP obj. & MILP s & Bilinear obj. & Bilinear s & Match \\
 \subsection{Tractability and the matheuristic}
 \label{sec:exp2}
 
-Figure~\ref{fig:runtime} shows the tractability cliff. With one
-affordable aircraft the direct MILP at 20 bases, 50 water points, and
-10 scenarios (81 fires) solves to proven optimality in under five
-minutes. Raising the budget into the two-aircraft regime on the same
-instance, the direct solve ran for almost 16 wall-clock hours (about
-48 CPU-hours) without proving optimality before being terminated;
-re-run under a 1,800 second limit it returned an incumbent with a 100
-percent MIP gap, that is, a lower bound near zero. The combinatorics
-of jointly placing two aircraft, their bases, and shared water
-investments is qualitatively harder, and this is precisely the regime
-where the integrated question matters.
+Figure~\ref{fig:runtime} shows how direct tractability degrades as
+the fleet regime grows. Single-aircraft instances at 20 bases, 50
+water points, and 10 scenarios (81 fires) solve to proven optimality
+in 12 to 17 minutes. The two-aircraft regime is borderline: at a
+tight budget (160 G, leaving 8 G of slack) the direct solve proves
+optimality in about ten minutes, while with more slack (225 G) it
+still carries a 0.5 percent gap at the 1,800 s limit. At three
+aircraft (300 G) that limit leaves an essentially 100 percent gap, a
+lower bound near zero; an earlier unlimited two-aircraft probe, run
+before the containment units were corrected, had already burned 16
+wall-clock hours without proof, which is what fixed the 1,800 s
+protocol used throughout. What drives the cliff is budget slack and
+the configuration symmetry it buys as much as fleet size itself,
+cheap bases alone leave a 69 percent gap at the same limit
+(Section~\ref{sec:exp6}), and this is precisely the regime where the
+integrated question matters.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.8\textwidth]{fig_runtime}
 \caption{Direct integrated MILP wall-clock time at 20 bases, 50 water
 points, 81 fires, as the fleet regime grows. Blue: proven optimal.
-Vermillion: not proven (cut at the 1,800 s limit with 100 percent MIP
-gap, or terminated unproven).}
+Vermillion: cut at the 1,800 s limit, labeled with the remaining MIP
+gap.}
 \label{fig:runtime}
 \end{figure}
 
-The matheuristic crosses the catalog-scale barrier that the direct
-model cannot approach at all. On the full 120-base, 5,449-water-point
-catalog with two real scenarios it converged in 2.5 seconds (Gurobi
-sub-solves; 36 seconds with the open-source CBC solver) to the same
-objective value, 73.847, that the direct MILP proves optimal on
-truncated instances of the same scenarios, a genuine cross-check of
-the reduced-sub-MILP exactness argument at real scale. A ten-scenario
-(81 fire) full-catalog run took 15.8 seconds per iteration.
-Figure~\ref{fig:tuning} reports the runtime scaling of the sub-solves
-with neighborhood size from the tuning sweep; water neighborhood size
-dominates cost, consistent with the $|I| \times |K|$ auxiliary count.
+The matheuristic is the exact-by-construction alternative at catalog
+scale, where the direct MILP cannot even be built. On truncated
+instances it recovers the proven optimum at every size, provided its
+iteration budget is adequate: with 150 iterations (patience 60) it
+matches the certified optimum exactly at all three sizes, in 34
+seconds at 20 bases and 50 water points, whereas a short budget (30
+iterations, patience 15) stalls 10 percent above it, evidence that
+the corrected instance genuinely discriminates solution quality. On
+the full 120-base, 5,449-water-point catalog its incumbents are upper
+bounds without optimality certificates, and they tell the cycle story
+directly. With two scenarios the full catalog reaches 73.85 in 18
+seconds, roughly half the proven optimum of the largest certifiable
+truncation (152.37 at 20 bases and 50 water points): the denser water
+network buys containment that no truncation can. With ten scenarios
+(81 fires) the full-catalog incumbent lands within solver tolerance
+of the certified truncated optimum (22,243 against 22,242, at a
+different, alternate-optimal base) in 235 seconds.
+Figure~\ref{fig:tuning} summarizes the tuning sweep behind
+Section~\ref{sec:method}'s configuration choices: the random destroy
+operator is what makes the search reliable, and sub-solve cost scales
+multiplicatively in both neighborhood dimensions, consistent with the
+$|I| \times |K|$ auxiliary count.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.62\textwidth]{fig_tuning}
-\caption{Matheuristic runtime versus neighborhood size (mean of 100
-iteration runs across destroy probabilities and five seeds each, 20
-base, 50 water point instance).}
+\caption{Matheuristic tuning sweep (24 configurations, five seeds
+each, 100 iterations, early stopping disabled; 20 base, 50 water
+point instance with a known optimum). Left: reliability. Share of
+the 30 runs per destroy probability $\pi$ that reach the optimum;
+pure geographic destroy ($\pi = 0$) stalls in 4 of 30 runs. Right:
+cost. Mean run time by neighborhood size, averaged over destroy
+probabilities; cost grows in both neighborhood dimensions.}
 \label{fig:tuning}
 \end{figure}
 
@@ -763,27 +796,44 @@ more valuable fire whose only water point is economically out of
 reach, a misdirection no budget split can undo.
 
 On the real Cundinamarca instances the result is an honest null with a
-sharp structural explanation. Across every single-aircraft
-configuration tested (budgets of 78, 80, 90, and 150 G COP, water
-costs at both 50 M and the top-of-range 300 M, two and ten scenarios,
-up to 20 bases and 50 water points), the best sequential solution
-matches the integrated optimum to solver precision. The reason is
-regime structure: with $c^{\mathrm{air}} = 75$ G, any budget in
-$[76, 152)$ G fields exactly one aircraft; constraint \eqref{eq:fleet}
-then serves at most one fire per scenario, so at most $|S|$ distinct
-water points are ever needed, and even the tightest leftover budget
-buys them. Water cannot compete for budget, and a water-blind base
-choice is as good as an informed one. In the two-aircraft regime (160
-G) the integrated arm cannot prove optimality (Section~\ref{sec:exp2}),
-so the gap there remains bounded rather than measured: notably, the
-sequential baseline found, in 26 seconds, a solution matching the
-incumbent that 30 minutes of direct branch and bound produced, which
-recommends it independently as a warm start. The honest headline is
-conditional: sequential siting is near-optimal in single-aircraft
-regimes, and the integrated model's value concentrates where fleets
-grow or water becomes the binding margin, a characterization we
-consider more useful to a planner than a gap manufactured at a
-contrived parameter point.
+sharp structural explanation. Across every configuration tested,
+single-aircraft budgets of 78, 80, 90, and 150 G COP, water costs at
+both 50 M and the top-of-range 300 M, two and ten scenarios, up to 20
+bases and 50 water points, and now also the two-aircraft budget of
+160 G, which the corrected instance solves to proven optimality in
+about ten minutes, the best sequential solution matches the
+integrated optimum to solver tolerance (at 90 G the sequential value
+even lands 0.005 percent below the integrated incumbent, which
+stopped at the solver's default relative gap; tolerance noise, not a
+real gap). The reason is regime structure: with $c^{\mathrm{air}} =
+75$ G, any budget in $[76, 152)$ G fields exactly one aircraft;
+constraint \eqref{eq:fleet} then serves at most one fire per
+scenario, so at most $|S|$ distinct water points are ever needed, and
+even the tightest leftover, 2 G at $B = 78$ G, buys the handful that
+matter. Water cannot compete for budget, and a water-blind base
+choice is as good as an informed one. The $\phi$ sweep exposes the
+mechanism directly: every split that cannot fund the aircraft
+($\phi < 0.975$ at 78 G) collapses to the all-escape plan, and every
+split that can reproduces the same optimum. The baseline also
+recommends itself as a warm start, reaching the 160 G optimum in 36
+seconds against 618 for the direct integrated solve. The honest
+headline is conditional: sequential siting is optimal or
+indistinguishable from optimal in every regime we can certify, one
+and two aircraft alike; the hand-built counterexample shows the gap
+becomes strictly positive when a single decisive water point is
+economically out of a water-blind planner's reach; and the regime
+where the integrated model plausibly matters, three-plus aircraft
+under large budget slack, is exactly the one the direct MILP cannot
+certify (Sections~\ref{sec:exp2} and~\ref{sec:exp6}). We therefore
+measured that regime against the strongest integrated search
+available instead of leaving it bounded: at 300 G the matheuristic,
+run cold and re-run warm-started from the sequential plan itself
+(150 iterations, about half an hour each), lands on the sequential
+value to solver tolerance, as does the direct solver's own 1,800 s
+incumbent, four independent solution paths agreeing at 14,478.11.
+What is missing in the three-aircraft regime is the certificate,
+whose lower bound configuration symmetry destroys, not a better
+plan.
 
 \subsection{Risk attitude}
 \label{sec:exp4}
@@ -793,14 +843,17 @@ Figure~\ref{fig:exp4} sweeps the mean-risk weight $\lambda$ on the
 degenerate: expected loss and CVaR are both flat from $\lambda = 0$ to
 $0.75$, because a single affordable aircraft cannot hedge the worst
 day at all, there is no tail-protection to buy. At $\lambda = 1$, pure
-CVaR, the solver returns a dominated plan: identical CVaR, 35 percent
-worse expected loss, three more escaped fires, since a pure tail
-objective is indifferent to everything off the tail. This is the
+CVaR, the solver returns a dominated plan: identical CVaR, 54 percent
+worse expected loss, six more escaped fires, since a pure tail
+objective is indifferent to everything off the tail; every plan with
+the same tail value is optimal at $\lambda = 1$, and which one the
+solver returns is arbitrary, exactly the degeneracy a lexicographic
+or epsilon-regularized objective would remove. This is the
 textbook argument for the mean-risk combination over pure CVaR,
 reproduced on real data. With ten equiprobable scenarios,
 $\CVaR_{0.95}$ equals the worst-scenario loss, the expected
-small-sample behavior under SAA, which a full replication analysis
-(ongoing work) will quantify with optimality-gap confidence intervals.
+small-sample behavior under SAA, which the replication analysis of
+Section~\ref{sec:saa} quantifies.
 
 \begin{figure}[t]
 \centering
@@ -813,41 +866,147 @@ degenerate under a single affordable aircraft, and pure CVaR
 \label{fig:exp4}
 \end{figure}
 
-\subsection{Sensitivity: a fleet-limited system}
+\subsection{SAA replication and optimality gap}
+\label{sec:saa}
+
+How much of the ten-scenario results is sampling noise? We follow the
+replication protocol of \citet{kleywegt2001}: $M = 10$ independent
+bootstrap replications of $N = 10$ day-scenarios each, all ten solved
+to proven optimality within the limit and none excluded, whose mean
+optimal value estimates a statistical lower bound on the true
+optimum, 10{,}505 with a 95 percent $t$-interval of $\pm$6{,}074. The
+interval is wide because day-to-day fire load varies enormously
+(replication optima range from 41 to 22{,}716), which is exactly the
+variance a day-scenario model must carry. The ten candidate
+first-stage plans, one per replication, are then evaluated on an
+independent 100-scenario sample; the best is re-evaluated on a
+second, fresh 100-scenario sample, so that selecting the minimum does
+not flatter the bound. The selected plan's fresh-sample mean-risk
+value is 10{,}876 (expectation component 2{,}631 $\pm$ 1{,}008; CVaR
+component 19{,}121, a point estimate), giving an optimality-gap point
+estimate of 371, or 3.4 percent of the upper bound.
+
+Two further readings matter. First, selection is what makes the
+bound tight: the pre-registered naive candidate, the first
+replication's plan, which happened to be optimized against an
+unusually quiet draw, evaluates to a 69 percent gap, while four of
+the ten independently drawn replications evaluate to the identical
+mean-risk value on the selection sample, so SAA at $N = 10$ already
+stabilizes the first-stage deployment even though it cannot certify
+it. Second, the CVaR component is noisy at this evaluation size: the
+same selected plan's sample CVaR moved from 35{,}947 on the selection
+sample to 19{,}121 on the fresh one, which is why the reported upper
+bound comes from the fresh sample only and why the gap carries a
+formal confidence interval only on its expectation component. The
+downward small-sample bias of sample CVaR loosens, without
+invalidating, the statistical lower bound.
+
+\subsection{Sensitivity: fleet first, containment physics second}
 \label{sec:exp6}
 
 A one-at-a-time sweep around the base case varies seven axes: budget,
 window, $A_0$, $c$, $\rho_{\mathrm{scale}}$, and both site costs, 21
-exact solves in total (multi-aircraft budget points are bounded at a
-1,800 s limit and reported as incumbents). The result is stark
-(Figure~\ref{fig:exp6}): budget is the only axis that moves the
-objective. Window from 1 to 8 hours, initial area from 1 to 30
-hectares, water demand from 1.5 to 10 liters per square meter, spread
-rates halved or doubled, base costs from 300 to 6,000 M and water
-costs from 15 to 300 M all leave the optimal objective identical to
-floating-point precision; only the specific alternate-optimal site
-choices shuffle. Under the real program budget the system is
-fleet-limited, not fire-physics-limited and not site-cost-limited: 74
-of 81 fires escape because one aircraft serves one fire per
-day-scenario, so the constants of the containment model have no room
-to matter. This finding is convenient for the model's credibility, the
-policy conclusion is insensitive to exactly the constants we could not
-calibrate, and it carries a policy edge: at these prices, marginal
-pesos buy more protection as aircraft (with their basing) than as any
-refinement of the ground network, until the fleet grows enough for
-water siting to bind. It must be read alongside the disclosed
-no-intra-day-reuse simplification, which understates single-aircraft
-capacity and correspondingly overstates the marginal value of the
-second aircraft.
+solves in total, each under a 1,800 s limit; four points did not
+reach proof and are reported as incumbents with their remaining gaps
+(the two multi-aircraft budgets, the four-hour window, and the
+cheapest base cost). The result has a clear hierarchy.
+
+Budget moves the objective most (Figure~\ref{fig:exp6}): 225 G fields
+two aircraft and improves the base case by 18 percent (incumbent at a
+0.5 percent gap), and 300 G fields three for a 35 percent improvement,
+though there the remaining gap is essentially 100 percent, the
+tractability cliff of Section~\ref{sec:exp2}.
+
+The containment constants now matter too, and they matter as a cliff
+rather than a dial. The base case contains 7 of 81 fires: one
+aircraft, one fire per day-scenario, and not every day's best fire is
+containable. Halving the window to one hour loses containments
+(objective up 6 percent); stretching it to four hours gains them
+(incumbent 16 percent below the base case, at a 2.5 percent gap) and
+then saturates, since the eight-hour point, solved to proven
+optimality, lands on exactly the same value: once the served fire's
+requirement fits inside the window, constraint \eqref{eq:fleet}, not
+time, is what binds. $A_0$ and $c$ sweep the system across its
+containability cliff: at $A_0 = 5$ ha, or 14 ha, or $c = 10$
+L/m$^2$, essentially nothing is containable by a single Firehawk (80
+to 81 of 81 fires escape and the objective sits at or within 0.05
+percent of the all-escape value, with the 14 ha solution opening
+nothing at all), while at $A_0 = 0.1$ ha or $c = 1.5$ the objective
+saturates at the same floor as the long windows, the value of serving
+the best containable fire each day. Doubling
+$\rho_{\mathrm{scale}}$ raises expected loss by 20 percent while
+leaving the worst day untouched: spread rate degrades the average,
+not the tail this fleet cannot hedge anyway.
+
+Site costs remain the one axis that never moves the objective across
+its full documented range, the surviving piece of the pre-correction
+reading. Cheap bases do, however, destroy tractability rather than
+economics: at 300 M per base the solver still carried a 69 percent
+gap at its limit while its incumbent matched the proven optimum of
+every other cost point, pure configuration symmetry.
+
+The policy reading is sharper than a flat sensitivity table. At these
+prices, marginal pesos buy more protection as aircraft with their
+basing than as any refinement of the ground network; but whether an
+aircraft buys anything at all is decided by the containment regime,
+that is, by how large fires are when attack begins, which argues for
+pairing any acquisition with faster detection-to-dispatch. All of it
+must be read alongside the disclosed no-intra-day-reuse
+simplification, which understates single-aircraft capacity and
+correspondingly overstates the marginal value of additional
+aircraft.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.62\textwidth]{fig_exp6_budget}
-\caption{Experiment 6, budget axis: the only sensitivity axis that
-moves the optimal objective. Annotations give the fleet size fielded.
-Open markers are 1,800 s incumbents (upper bounds on the optimum).}
+\caption{Experiment 6, budget axis: the dominant sensitivity axis.
+Annotations give the fleet size fielded. Open markers are 1,800 s
+incumbents (upper bounds on the optimum).}
 \label{fig:exp6}
 \end{figure}
+
+\subsection{The plan on the ground}
+\label{sec:ground}
+
+Solved plans are useful to a planner only as places, so we close the
+study by reading the base-case optimum operationally (the full
+solution report is generated by a committed script). The plan opens
+one base, the Cerritos aerodrome, about 79 km west of Bogot{\'a}
+toward the Magdalena valley, stations the single affordable Firehawk
+there, and enables water points of which exactly six are ever used:
+the La Regadera reservoir, Lake Guatavita, the Pantano Redondo and
+Encatada lagoons, the Romero well (used on two of the ten days), and
+one waterfall pool, each a named, existing water body from the
+OpenStreetMap and CAR catalogs. Across the ten day-scenarios the
+aircraft serves the highest-exposure containable fire of each day,
+seven containments in all, with delivery margins between 1 and 30
+percent of the requirement (30,283 liters delivered against a 30,000
+liter requirement on the tightest day): the water-cycle coupling is
+the binding margin of every single containment, not a theoretical
+nicety. The worst scenario in the CVaR tail is the real day of 15
+January 2024, eighteen simultaneous fires, the very episode that
+motivated the Firehawk program.
+
+Three operational readings follow, stated with the caveat that
+several bases tie as alternate optima (Cerritos, Colombaima, and
+aerodromes as far as Sogamoso and Canaima appear across equivalent
+runs). First, what is stable across every tie is not the aerodrome
+but the served fires and the water points that serve them: the six
+water bodies above cost about 300 M COP in total at the swept
+enabling cost, 0.4 percent of one aircraft, so securing legal and
+logistical dip access to a short list of named reservoirs and
+lagoons is the highest-leverage, lowest-cost action available, and
+it is actionable before any aircraft arrives. Second, because the
+base choice is degenerate, the aerodrome can be selected on criteria
+the model does not price, existing infrastructure, maintenance
+co-location, military logistics, at no measured loss of protection,
+provided the water list comes with it. Third, the containability
+cliff of Section~\ref{sec:exp6} translates into dispatch doctrine:
+every containment in the plan happens because the aircraft attacks
+the day's best containable fire within the two-hour window, and at
+attack sizes above five hectares nothing is containable, so the
+value of the acquisition rides on detection-to-dispatch speed as
+much as on where anything is sited.
 
 \section{Conclusions, limitations, and ongoing work}
 \label{sec:conclusions}
@@ -859,10 +1018,17 @@ CVaR objective, gave it an exact linearization and a verified-exact
 fix-and-optimize matheuristic, and built a fully sourced open-data
 case study for Cundinamarca around Colombia's real Firehawk
 acquisition. The computational study's contribution is structural: a
-fleet-limited regime in which sequential siting is provably adequate
-and the containment constants are immaterial, a sharp tractability
-cliff exactly where fleets grow, and CVaR degeneracies that argue for
-the mean-risk form on real data.
+fleet-first, physics-second regime in which sequential siting is
+indistinguishable from optimal in every certifiable configuration;
+containment constants that act as a containability cliff rather than
+as nuisance parameters, so the model separates the fire regimes an
+acquisition can and cannot defend; site costs that never bind; a
+tractability cliff driven by fleet size and budget slack; CVaR
+degeneracies that argue for the mean-risk form on real data; and an
+operational reading in real places, a one-aircraft plan whose
+protection rides on a short, nearly free list of named water bodies
+and on attack speed rather than on the specific aerodrome chosen
+(Section~\ref{sec:ground}).
 
 Limitations are disclosed throughout and summarized here. The
 containment law is a phenomenological exponential with uncalibrated,
@@ -873,11 +1039,13 @@ aircraft type is single; site costs are uniform sweep points; and
 water points are uncapacitated, with no volume depletion or
 simultaneous-use congestion, a simplification that matters most
 precisely in the multi-aircraft regimes where the integrated model's
-value concentrates. Two
-pieces of the full experimental program are ongoing: SAA replication
-with optimality-gap confidence intervals, and measuring, rather than
-bounding, the integrated-versus-sequential gap in multi-aircraft
-regimes with the matheuristic as the integrated arm.
+value concentrates. The one open computational question is
+certification in the three-aircraft, high-budget-slack regime: four
+independent solution paths agree there to solver tolerance
+(Section~\ref{sec:exp3}), but none proves optimality, because budget
+slack destroys the direct lower bound through configuration
+symmetry; symmetry breaking or stronger bounds for that regime are
+the natural next step.
 
 \paragraph{Reproducibility.} All code, the data pipeline, every
 experiment script, and the verification log of every decision and

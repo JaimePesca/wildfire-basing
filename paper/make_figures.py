@@ -162,24 +162,34 @@ def fig_exp6_budget() -> None:
 
 def fig_runtime() -> None:
     # Wall-clock of the DIRECT integrated Gurobi solve at 20 bases / 50
-    # water points / 10 scenarios (81 fires) as the fleet regime grows.
-    # Values from results/experiment6_sensitivity.csv (150/225/300 G COP)
-    # and CLAUDE.md section 10 (the killed un-limited two-aircraft run).
-    labels = [
-        "1 aircraft (B = 150 G): proven optimal",
-        "2 aircraft (B = 225 G): cut at limit, gap 100%",
-        "3 aircraft (B = 300 G): cut at limit, gap 100%",
-        "2 aircraft, no limit: killed unproven",
-    ]
-    seconds = [279.5, 1802.9, 1802.7, 57000.0]
-    proven = [True, False, False, False]
+    # water points / 10 scenarios (81 fires) as the fleet regime grows,
+    # read straight from results/experiment6_sensitivity.csv (the center
+    # solve plus the budget axis), never hardcoded.
+    df = pd.read_csv(ROOT / "results/experiment6_sensitivity.csv")
+    center = df[df["axis"] == "center"].iloc[0].copy()
+    center["value"] = 150e9
+    bud = df[df["axis"] == "budget"].copy()
+    rows = pd.concat([center.to_frame().T, bud]).sort_values("value")
+
+    labels, seconds, proven = [], [], []
+    for _, r in rows.iterrows():
+        n_acft = int(r["n_aircraft_total"])
+        if bool(r["timed_out"]):
+            gap_pct = 100 * float(r["mip_gap"])
+            gap_txt = f"{gap_pct:.1f}%" if gap_pct < 10 else f"{gap_pct:.0f}%"
+            status = f"cut at limit, gap {gap_txt}"
+        else:
+            status = "proven optimal"
+        labels.append(f"{n_acft} aircraft (B = {float(r['value']) / 1e9:.0f} G): {status}")
+        seconds.append(float(r["solve_time_s"]))
+        proven.append(not bool(r["timed_out"]))
 
     fig, ax = plt.subplots(figsize=(6.2, 2.3))
     colors = [BLUE if p else VERMILLION for p in proven]
     y = range(len(labels))[::-1]
     ax.barh(list(y), seconds, color=colors, height=0.55)
     ax.set_xscale("log")
-    ax.set_xlim(10, 2e5)
+    ax.set_xlim(10, max(seconds) * 4)
     ax.set_xlabel("Wall-clock seconds (log scale)")
     ax.set_yticks(list(y))
     ax.set_yticklabels(labels, fontsize=8)
@@ -194,8 +204,40 @@ def fig_runtime() -> None:
 
 
 def fig_tuning() -> None:
+    # Two panels, two messages. Left: RELIABILITY, share of the 30 runs
+    # per destroy probability (6 configurations x 5 seeds) that reach the
+    # known optimum; pure geographic destroy (pi = 0) is the unreliable
+    # one. Right: COST, mean 100-iteration run time by neighborhood size,
+    # averaged over destroy probabilities. Dot plot on the left so the
+    # zoomed percentage axis stays honest (no truncated bars).
     df = pd.read_csv(ROOT / "results/tune_matheuristic.csv")
-    fig, ax = plt.subplots(figsize=(4.4, 2.7))
+    fig, axes = plt.subplots(1, 2, figsize=(6.4, 2.6))
+
+    ax = axes[0]
+    rel = df.groupby("random_destroy_prob")["hit_rate"].mean().reset_index()
+    ax.plot(
+        rel["random_destroy_prob"], 100 * rel["hit_rate"], "o",
+        color=BLUE, ms=8, clip_on=False,
+    )
+    for _, r in rel.iterrows():
+        ax.annotate(
+            f"{100 * r['hit_rate']:.0f}%",
+            xy=(r["random_destroy_prob"], 100 * r["hit_rate"]),
+            xytext=(0, 7), textcoords="offset points",
+            ha="center", fontsize=7.5, color=GRAY,
+        )
+    ax.set_xlabel(r"Random destroy probability $\pi$")
+    ax.set_ylabel("Runs reaching the optimum (%)")
+    ax.set_xticks(rel["random_destroy_prob"])
+    ax.set_ylim(80, 103)
+    ax.annotate(
+        "pure geographic destroy:\n4 of 30 runs stall",
+        xy=(0.0, 100 * rel["hit_rate"].iloc[0]), xytext=(0.08, 84),
+        fontsize=7.5, color=GRAY,
+        arrowprops=dict(arrowstyle="->", lw=0.7, color=GRAY),
+    )
+
+    ax = axes[1]
     for nb, color, marker in ((5, BLUE, "o"), (10, GREEN, "s")):
         sub = (
             df[df["n_bases_per_neighborhood"] == nb]
@@ -206,12 +248,14 @@ def fig_tuning() -> None:
         ax.plot(
             sub["n_water_per_neighborhood"], sub["mean_time_s"], marker=marker,
             color=color, lw=1.5, ms=5,
-            label=f"{nb} bases per neighborhood",
+            label=f"{nb} bases freed",
         )
-    ax.set_xlabel("Water points per neighborhood")
+    ax.set_xlabel("Water points freed per iteration")
     ax.set_ylabel("Mean run time, s (100 iterations)")
     ax.set_xticks([10, 25, 50])
+    ax.set_ylim(0, None)
     ax.legend(frameon=True, framealpha=0.9, edgecolor="#CCCCCC", fontsize=7.5)
+
     fig.tight_layout()
     fig.savefig(FIGS / "fig_tuning.pdf", bbox_inches="tight")
     plt.close(fig)
