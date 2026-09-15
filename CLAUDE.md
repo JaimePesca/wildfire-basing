@@ -1344,8 +1344,162 @@ not to be silently resolved:
   alternate-optimal noise, never a finding), and t_arrival being
   recomputed over each experiment's truncated base subset.
   solve_sequential_best_phi also made tolerant of a failed phi (skips
-  it instead of losing the sweep). Re-run results recorded below once
-  finished, same date.
+  it instead of losing the sweep).
+
+- Post-fix re-run campaign COMPLETED 2026-09-13, split across two
+  coordinated sessions (this one and the resumed original session;
+  division of work and CSV collisions agreed by direct session
+  message; the results/ CSVs of this date are the record). All runs at
+  DECIDED parameters and the re-anchored center (A0=1 ha, c=3,
+  ros_scale=1, cost_base 1,000M, cost_water 50M unless the axis itself
+  varies):
+  1. Experiment 1: exactness match HOLDS post-fix (objective 8,576.834
+     at 3:5, 5:10 and 8:15; bilinear arm 0.64-0.96x the MILP's time).
+  2. Experiment 2 (CSV of record at --max-iterations 150
+     --no-improve-limit 60): matheuristic reaches the proven optimum
+     exactly at all three sizes (34 s at 20:50, 109 iterations); the
+     old defaults (30/15) stall 10.1 percent above at 20:50. Iteration
+     budget now genuinely matters; kept as tuning evidence.
+  3. Experiment 3: best-case sequential MATCHES the integrated optimum
+     at every certifiable point: 2-scenario instances at cost_water
+     50M and 300M (all three sizes), 10-scenario gap hunts at budgets
+     78/80/90G with cost_water 300M (phi below the
+     aircraft-affordability threshold collapses to the all-escape
+     plan), and the two-aircraft b160, which the corrected instance
+     now SOLVES TO PROVEN OPTIMALITY in 618 s (the pre-fix 16 h
+     no-proof run was partly a bug artifact; the cliff moved). b90's
+     sequential lands 0.0046 percent BELOW the integrated incumbent:
+     Gurobi default gapRel tolerance noise, not a real gap, disclosed
+     in the paper. The two-aircraft gap is therefore now MEASURED at
+     this size: zero; only the three-aircraft/high-slack regime
+     remains bounded-not-measured (ongoing work in the manuscript).
+  4. Experiment 4: qualitative story unchanged post-fix: E[loss] and
+     CVaR flat over lambda 0-0.75 (E 5,506.16, CVaR=worst 38,977.83),
+     dominated plan at lambda=1 (+54 percent E[loss], 6 more escapes).
+  5. Experiment 6: the pre-fix "everything flat except budget" finding
+     is DEAD (bug artifact, do not cite). Post-fix hierarchy: budget
+     dominates (225G: -18 percent at 0.5 percent gap; 300G: -35
+     percent at ~100 percent gap, the relocated tractability cliff);
+     window/A0/c act as a CONTAINABILITY CLIFF (A0 >= 5 ha or c = 10
+     L/m^2: 80-81 of 81 escape, objective at/near the all-escape value
+     27,266.55, the 14 ha point opens nothing at all; A0 = 0.1, c =
+     1.5 and window >= 4 h all saturate at the serve-best-fire floor
+     18,742.84; window 4 h is a 2.5 percent-gap incumbent, 8 h proves
+     the same value); ros_scale x2 raises E[loss] 20 percent with the
+     tail unchanged; site costs STILL never move the objective across
+     their full ranges (the surviving pre-fix finding), though
+     cost_base = 300M destroys tractability by configuration symmetry
+     (69 percent gap at 1,800 s with the incumbent matching the proven
+     optimum of every other cost point). 4 of 21 solves are time-limit
+     incumbents (both multi-aircraft budgets, window 4 h, cost_base
+     300M).
+  6. Full-catalog matheuristic (destroy 0.3, peer session): 2
+     scenarios: 73.847 in 17.7 s, roughly HALF the certified 20:50
+     optimum 152.375, i.e. the full 5,449-point water network buys
+     containment no truncation can (the number matches the pre-fix
+     value because the optimal ESCAPE SET is identical there, not by
+     accident of the bug); 10 scenarios: 22,243.02 in 235 s, within
+     solver tolerance of the certified truncated optimum 22,241.99
+     (alternate-optimal base aero_SKAI). Both are incumbents without
+     certificates, upper bounds, stated as such in the paper.
+  7. Tuning sweep post-fix (24 configs x 5 seeds x 100 iterations,
+     early stop disabled): the corrected instance finally
+     discriminates reliability: random_destroy_prob=0 misses the
+     optimum in 3 of its 6 configs (hit rates 0.6-0.8, one run
+     stalling ~8,400 above the optimum at the 5:10-visible plateau),
+     while rdp >= 0.2 hits 89/90 runs. Defaults kept and now
+     EVIDENCE-BACKED, not just insurance: n_bases=5, n_water=10,
+     rdp=0.3 (fastest reliable band, ~22-26 s per 100 iterations).
+     Cost scales multiplicatively in BOTH neighborhood dimensions.
+     CAVEAT: the peer's SAA replication ran concurrently during part
+     of the sweep window, so absolute mean times carry some
+     CPU-contention noise; the config ordering is monotone and stands.
+  8. SAA replication (peer session; script extended to the full
+     selection protocol, commit 402329e): M=10 x N=10 days, 10/10
+     proven, 0 excluded; statistical LB 10,504.86 +- 6,073.52 (95
+     percent t-CI; replication optima span 41 to 22,716, the
+     day-to-day variance is the point); candidate selection over
+     N'=100 (seed 999), winner (replication 1, seed 2) re-evaluated on
+     fresh N''=100 (seed 998): UB 10,876.07 (E 2,630.85 +- 1,007.73;
+     CVaR point 19,121.29), GAP 371.21 = 3.41 percent of UB. The
+     pre-registered naive candidate gaps at 68.65 percent (optimized
+     against an anomalously quiet draw; kept in the CSV for
+     comparability): selection, not luck, makes the bound tight. 4 of
+     10 independent replications evaluate IDENTICALLY on the selection
+     sample: first-stage deployment stability under SAA, cited in the
+     manuscript. Sample-CVaR noise disclosed (same plan: CVaR 35,947
+     on selection sample vs 19,121 on the fresh one), which is why the
+     UB of record is fresh-sample only.
+  9. Manuscript reconciled 2026-09-13: sections 6.1-6.5 rewritten on
+     the fresh CSVs, new SAA subsection (sec:saa), abstract, intro,
+     method-tuning paragraph and conclusions updated to the
+     fleet-first, physics-second story; figures regenerated from the
+     CSVs (fig_runtime now reads experiment6_sensitivity.csv instead
+     of hardcoding); experiment 5 stays dropped (user decision,
+     2026-09-12 entry above).
+
+- Second 2026-09-13 batch (user-directed, same day):
+  1. AUTHORSHIP SET (user decision): Jaime Enrique Pesca Santos,
+     corresponding author, jaime.pesca@uexternado.edu.co, Facultad de
+     Administracion de Empresas, Universidad Externado de Colombia;
+     and Kiana Hikaru Ysa Morla, kiana.ysa@utec.edu.pe, Universidad de
+     Ingenieria y Tecnologia (UTEC), Lima, Peru. The author TODO is
+     resolved; acknowledgments/funding TODO remains. Repo made PRIVATE
+     by the user (the 2026-09-09 public-repo question is closed).
+  2. ITOR format applied after checking the journal's author
+     guidelines (abstract <= 150 words, rewritten at ~135; up to 10
+     keywords, 9 added; Harvard alphabetical references already
+     satisfied by apalike); paper/cover_letter.txt drafted naming the
+     special issue per the call for papers. Compiles 18 pages, zero
+     undefined references, zero overfull boxes. NOTE for this OneDrive
+     checkout: latexmk needs -g (timestamps confuse its up-to-date
+     check), documented to the user.
+  3. References added after verification (existence/venue/pages
+     confirmed via publisher pages 2026-09-13): Hakimi 1964 (Oper Res
+     12(3):450-459, the p-median family citation) and Mendes and
+     Alvelos 2023 (EJOR 304(3):887-900, ILS placement of suppression
+     resources), both cited in intro/related work.
+  4. fig_tuning REDESIGNED (user found it unclear): two panels,
+     reliability (share of runs reaching the optimum by destroy
+     probability, the pi=0 failure annotated) and cost (mean run time
+     by neighborhood size); caption rewritten to say what to look at.
+  5. OPERATIONAL READING added (user request): new script
+     src/experiments/base_case_solution_report.py solves the DECIDED
+     base case and dumps the plan in real places
+     (results/base_case_solution.json). Base case optimum: one base,
+     Cerritos aerodrome (aero_SQIB, ~79 km west of Bogota), 1
+     Firehawk, exactly SIX water points ever used (La Regadera
+     reservoir, Lake Guatavita, Pantano Redondo, Encatada, El Pozo del
+     Romero x2 days, one waterfall pool), 7/81 fires contained, always
+     the day's highest-exposure containable fire, delivery margins 1
+     to 30 percent of requirement, and the CVaR-tail day is the REAL
+     2024-01-15 (18 fires), the episode that motivated the program.
+     New manuscript subsection 6.7 "The plan on the ground" plus a
+     conclusions line: the stable half of the plan is the named water
+     list (~300M COP total, 0.4 percent of one aircraft), the base is
+     degenerate across ties (Cerritos/Colombaima/Sogamoso/Canaima) and
+     can be chosen on unmodeled criteria, and containability rides on
+     detection-to-dispatch speed.
+  6. Experiment 3b RUN (closes the manuscript's last ongoing item):
+     src/experiments/experiment3_multiaircraft_matheuristic.py,
+     20:50:10 at 300G. Sequential best (phi=0.95; phase A buys 3
+     aircraft + 2 bases, 227,000M) = 14,478.1105; matheuristic cold =
+     14,478.1097 (150 iterations, ~30 min); warm-from-sequential =
+     14,478.1105 (92 iterations). The run's printed "STRICTLY BETTER"
+     verdict was an artifact of a naive 1e-6 threshold sitting far
+     below the sub-solves' default relative MIP gap (1e-4, ~1.4
+     absolute at this magnitude); script fixed the same day to use a
+     tolerance-aware verdict. HONEST READING (now in section 6.3):
+     four independent solution paths (direct 1,800 s incumbent, best
+     sequential, both matheuristic starts) agree at 14,478.11 to
+     solver tolerance; what is missing at 300G is a CERTIFICATE
+     (configuration symmetry destroys the direct lower bound), not a
+     better plan. Conclusions' ongoing item replaced by the
+     certification question (symmetry breaking / stronger bounds).
+  7. Internal explainer artifact published for the user (Spanish,
+     managerial+academic audiences): process diagrams, CVaR/SAA/
+     matheuristic concept cards, decision-defense table, results in
+     one page, hard-questions FAQ. Not part of the manuscript.
 
 ## 11. Citation discipline [FROZEN]
 
