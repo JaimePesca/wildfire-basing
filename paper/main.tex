@@ -12,6 +12,7 @@
 \usepackage{booktabs}
 \usepackage{threeparttable}
 \usepackage{graphicx}
+\usepackage{flafter}
 \usepackage[round]{natbib}
 \usepackage{url}
 \usepackage[hidelinks]{hyperref}
@@ -224,7 +225,7 @@ with given infrastructure; and \citet{wei2015} are strategic and
 stochastic but site no water and use coverage rather than a refill
 cycle.
 
-\begin{table}[t]
+\begin{table}[!htbp]
 \centering
 \begin{threeparttable}
 \caption{Classification of the related literature against the three
@@ -302,7 +303,7 @@ reference system (CRS), registered as code 9377 in the European
 Petroleum Survey Group (EPSG) geodetic registry (EPSG:9377); time is
 in hours, and money is in Colombian pesos (COP).
 
-\begin{table}[t]
+\begin{table}[!htbp]
 \centering
 \caption{Notation. Every fire-indexed quantity is scoped to its
 scenario: a bare $f$ means for $f \in F_s$ within scenario $s$.}
@@ -498,7 +499,7 @@ Sections~\ref{sec:exp6} and~\ref{sec:conclusions}.
 All data are open, and every processing decision is scripted in the
 companion repository. Figure~\ref{fig:studyarea} shows the study area.
 
-\begin{figure}[t]
+\begin{figure}[!htbp]
 \centering
 \includegraphics[width=0.72\textwidth]{fig_study_area}
 \caption{The Cundinamarca instance: 2,425 fire events detected during
@@ -586,7 +587,7 @@ Colombia-specific source and are declared illustrative sweep ranges,
 never calibrated values, a disclosure discipline we consider a
 methodological contribution of the case study.
 
-\begin{table}[t]
+\begin{table}[!htbp]
 \centering
 \begin{threeparttable}
 \caption{Base-case parameters, provenance, and sweep treatment.
@@ -711,7 +712,7 @@ evidently linearizes the binary product internally at least as well.
 The linearized model remains the formulation of record because it is
 solver-portable and is the sub-problem the matheuristic solves.
 
-\begin{table}[t]
+\begin{table}[!htbp]
 \centering
 \caption{Experiment 1: linearized MILP versus literal bilinear
 formulation, two real scenarios (15 fires), base-case parameters.
@@ -749,7 +750,7 @@ cheap bases alone leave a 69 percent gap at the same limit
 (Section~\ref{sec:exp6}), and this is precisely the regime where the
 integrated question matters.
 
-\begin{figure}[t]
+\begin{figure}[!htbp]
 \centering
 \includegraphics[width=0.8\textwidth]{fig_runtime}
 \caption{Direct integrated MILP wall-clock time at 20 bases, 50 water
@@ -782,7 +783,7 @@ operator is what makes the search reliable, and sub-solve cost scales
 multiplicatively in both neighborhood dimensions, consistent with the
 $|I| \times |K|$ auxiliary count.
 
-\begin{figure}[t]
+\begin{figure}[!htbp]
 \centering
 \includegraphics[width=0.62\textwidth]{fig_tuning}
 \caption{Matheuristic tuning sweep (24 configurations, five seeds
@@ -875,7 +876,7 @@ $\CVaR_{0.95}$ equals the worst-scenario loss, the expected
 small-sample behavior under SAA, which the replication analysis of
 Section~\ref{sec:saa} quantifies.
 
-\begin{figure}[t]
+\begin{figure}[!htbp]
 \centering
 \includegraphics[width=0.95\textwidth]{fig_exp4}
 \caption{Experiment 4: risk-attitude sweep. Left: expected loss.
@@ -937,6 +938,15 @@ two aircraft and improves the base case by 18 percent (incumbent at a
 though there the remaining gap is essentially 100 percent, the
 tractability cliff of Section~\ref{sec:exp2}.
 
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=0.62\textwidth]{fig_exp6_budget}
+\caption{Experiment 6, budget axis: the dominant sensitivity axis.
+Annotations give the fleet size fielded. Open markers are 1,800 s
+incumbents (upper bounds on the optimum).}
+\label{fig:exp6}
+\end{figure}
+
 The containment constants now matter too, and they matter as a cliff
 rather than a dial. The base case contains 7 of 81 fires: one
 aircraft, one fire per day-scenario, and not every day's best fire is
@@ -975,15 +985,6 @@ must be read alongside the disclosed no-intra-day-reuse
 simplification, which understates single-aircraft capacity and
 correspondingly overstates the marginal value of additional
 aircraft.
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.62\textwidth]{fig_exp6_budget}
-\caption{Experiment 6, budget axis: the dominant sensitivity axis.
-Annotations give the fleet size fielded. Open markers are 1,800 s
-incumbents (upper bounds on the optimum).}
-\label{fig:exp6}
-\end{figure}
 
 \subsection{The plan on the ground}
 \label{sec:ground}
