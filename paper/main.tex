@@ -107,8 +107,8 @@ within a critical window exceed a requirement that grows with arrival
 time and rate of spread, so no historical suppression outcome data,
 which do not exist for Colombia, are needed. The only nonlinearity, a
 bilinear product of dispatch and refill assignment, admits an exact
-McCormick linearization, yielding a mixed-integer linear program
-(MILP).
+McCormick linearization \citep{gupte2013}, yielding a mixed-integer
+linear program (MILP).
 
 Second, we develop a fix-and-optimize matheuristic
 \citep{helber2010} with large neighborhood search \citep{shaw1998}
@@ -118,8 +118,9 @@ of candidate sites plus the incumbent's open sites; a probabilistic
 random destroy operator, standard in adaptive large neighborhood
 search \citep{ropke2006}, provably escapes a class of local optima
 that purely geographic neighborhoods cannot leave. The reduced
-sub-problem keeps the full scenario set, so every accepted move is a
-verified improvement for the true problem.
+sub-problem keeps the full scenario set, so, by construction, every
+accepted move is a feasible first-stage solution whose true objective
+improves the incumbent (Section~\ref{sec:method}).
 
 Third, we construct a fully sourced, replicable case study for
 Cundinamarca from open data only: satellite fire detections for all of
@@ -469,7 +470,8 @@ liters coupling is bilinear in the natural formulation, $q_{fs} =
 \sum L_{ifkm}\, x_{ifms} z_{fks}$; constraints \eqref{eq:mc1} to
 \eqref{eq:mc3} replace each product with the auxiliary $u_{ifkms}$
 through a McCormick envelope that is exact, not a relaxation, because
-$z_{fks}$ is binary and $x_{ifms} \le M_m$ is valid. Constraint
+$z_{fks}$ is binary and $x_{ifms} \le M_m$ is valid
+\citep{gupte2013}. Constraint
 \eqref{eq:containment} enforces physical containment, and
 \eqref{eq:loss} to \eqref{eq:cvar} define scenario loss and the CVaR
 linking. Scenario probabilities must sum to one; the mean-risk CVaR
@@ -522,10 +524,12 @@ anchored on revisit and persistence; sensitivity of the event catalog
 to both radii is part of the pipeline. Detections are projected to
 EPSG:9377, the national single-zone planimetric standard, before
 clustering. Our implementation adapts \citet{birant2007} in the way
-standard across the ST-DBSCAN software ecosystem: the original
-non-spatial attribute threshold becomes a continuous temporal radius
-intersected with the spatial one, and border points join the first
-cluster that reaches them.
+standard across public ST-DBSCAN implementations: the original's
+non-spatial attribute threshold and discrete temporal-neighbor
+prefilter become a single continuous temporal radius intersected with
+the spatial one, and its cluster-mean similarity gate is omitted;
+border points join the first cluster that reaches them, as in the
+original.
 
 A scenario is one historical calendar day, matching the stochastic
 unit of \citet{wei2015}: the 366-day pool of 2024 (282 days with at
