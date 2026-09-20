@@ -20,9 +20,9 @@ El abstract queda en ~138 palabras tras la expansion de CVaR (limite ITOR: 150).
 Cualquiera de las propuestas del punto 6 lo mantiene por debajo de 150; la
 version corta suma ~6 palabras.
 
-## Decision pendiente del usuario
+## Decision del usuario (2026-09-20): APLICADA
 
-Punto 6: aprobar una de las dos redacciones propuestas (o mantener "which the
-matheuristic crosses"). Recomendacion: la version corta, porque "crosses" sin
-matiz sobrevende un regimen donde el propio manuscrito insiste en que falta el
-certificado, y un referee de ITOR va a leer el abstract contra la seccion 6.3.
+Punto 6 aprobado por el usuario ("Hagamos lo que propones"): el abstract dice
+ahora "...tractability collapses where fleets and budget slack grow, a regime
+the matheuristic still searches effectively, albeit without certificates."
+Conteo final: 147 palabras (limite ITOR 150).

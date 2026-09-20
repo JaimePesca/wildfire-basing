@@ -226,6 +226,44 @@ cobertura de la Tabla 1; ver Huang y Zhao abajo.
    2000/2022, Finney RMRS-RP-4 (leida, disponible como refuerzo del punto
    eliptico si se quiere una segunda cita).
 
+## 6b. Addendum 2026-09-20: decisiones del usuario aplicadas
+
+Respuestas del usuario a los pendientes de la seccion 6, aplicadas el
+2026-09-20:
+
+1. **Abstract**: aprobado; "which the matheuristic crosses" reemplazado por
+   "a regime the matheuristic still searches effectively, albeit without
+   certificates" (se retiro ademas "exactly" para compensar longitud).
+   Abstract final: 147 palabras (limite 150).
+2. **Huang y Zhao (2025)**: el usuario aporto el PDF del texto completo
+   (Sustainable Operations and Computers 6:116-129). Celdas verificadas
+   sobre el texto: Bases YES (primera etapa abre estaciones aereas en 78
+   sitios preseleccionados con costo de construccion C4, variable Yj, Sec.
+   4.1-4.2); Water NO (ningun punto de agua en el modelo; "water load" es
+   solo capacidad de tanque, Tabla 5); Joint NO; Cyclic NO (supuesto (1):
+   "without considering the actual firefighting actions that take place
+   following the aircraft's arrival at the fire site"; la perdida es
+   A = alfa(Dij/vk+t0)^beta, un solo trayecto, Sec. 4.2 ec. 8); Strategic
+   YES; Uncertainty SP (escenarios Bernoulli sobre probabilidades
+   logisticas de incendio con datos MODIS/FIRMS, resuelto con SAA +
+   NSGA-II, Secs. 4-5). Fila agregada a la Tabla 1, frase en la seccion 2
+   y entrada huang2025 en el .bib. NO amenaza la afirmacion "first...
+   jointly": no hay agua ni ciclo ni siting conjunto; es ademas la unica
+   fila con Bases Yes y SP a la vez, lo que refuerza la columna.
+3. **Fecha del draft**: eliminada de la portada (\date{}).
+4. **Chequeos manuales NWCG / archivo web.archive del PDF UNGRD**: OMITIDOS
+   por decision del usuario; las citas quedan como estan.
+5. **Funding y conflictos**: el usuario declara que no hay; el TODO se
+   reemplazo por el parrafo "Funding and competing interests" (sin
+   financiacion externa, sin conflictos).
+6. **Nota al pie de Kiana**: el simbolo dagger (cruz) del segundo \thanks
+   se cambio a seccion (S, \S) via \setcounter{footnote}{3}; verificado en
+   el PDF ("Kiana Hikaru Ysa Morla (S)" y "(S) kiana.ysa@utec.edu.pe").
+
+Unico pendiente que sigue abierto: el punto 3 de la seccion 6 (alinear
+"S-70i" -> "S-70" en CLAUDE.md seccion 8 y src/model/aircraft.py, fuera del
+manuscrito); los puntos 6-8 de la seccion 6 son opcionales.
+
 ## 7. Notas de forma
 
 - Estilo de referencias: apalike (Harvard alfabetico), lo que ITOR exige

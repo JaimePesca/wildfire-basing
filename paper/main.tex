@@ -33,11 +33,11 @@ jaime.pesca@uexternado.edu.co}\\
 \small Facultad de Administraci{\'o}n de Empresas, Universidad
 Externado de Colombia, Bogot{\'a}, Colombia
 \and
-Kiana Hikaru Ysa Morla\thanks{kiana.ysa@utec.edu.pe}\\
+Kiana Hikaru Ysa Morla\setcounter{footnote}{3}\thanks{kiana.ysa@utec.edu.pe}\\
 \small Universidad de Ingenier{\'i}a y Tecnolog{\'i}a (UTEC), Lima,
 Peru}
 
-\date{Draft of 13 September 2026}
+\date{}
 
 \begin{document}
 \maketitle
@@ -58,8 +58,9 @@ acquisition, shows a fleet-limited-first, physics-limited-second
 regime: budget dominates, uncalibrated growth constants act as a
 containability cliff, sequential bases-first planning matches the
 integrated optimum wherever certification is possible, and
-tractability collapses exactly where fleets and budget slack grow,
-which the matheuristic crosses.
+tractability collapses where fleets and budget slack grow, a regime
+the matheuristic still searches effectively, albeit without
+certificates.
 \end{abstract}
 
 \medskip
@@ -201,7 +202,12 @@ uncertainty: the scenario-based standard-response models of
 approach of \citet{ntaimo2013}, the two-stage seasonal deployment and
 dispatch design of \citet{wei2015}, which is the closest methodological
 comparator to our second stage, and the robust prepositioning of
-\citet{mendes2025}. Recent work also allocates heterogeneous aerial
+\citet{mendes2025}. \citet{huang2025} go further on the base side,
+siting new aviation rescue stations and configuring a heterogeneous
+helicopter fleet with a two-stage multi-objective stochastic model
+driven by satellite-based fire probabilities, yet with no water
+infrastructure and with losses driven by one-way response time rather
+than a refill cycle. Recent work also allocates heterogeneous aerial
 fleets across capacity-constrained airbases under efficiency and equity
 objectives \citep{tasias2026}. In all of these, water is either absent
 or exogenous.
@@ -268,6 +274,7 @@ Reference & Bases & Water & Joint & Cyclic & Strategic & Uncertainty \\
 \citet{ntaimo2013}                     & Partial & No      & No & No  & Yes & SP \\
 \citet{wei2015}                        & Partial & No      & No & No  & Yes & SP \\
 \citet{mendes2025}                     & Partial & No      & No & No  & Yes & RO \\
+\citet{huang2025}                      & Yes     & No      & No & No  & Yes & SP \\
 \citet{alfaro2024}                     & No      & Yes     & No & No  & Yes & No \\
 \citet{ramalho2021}                    & No      & Yes     & No & No  & Yes & No \\
 \citet{ramalho2024}                    & No      & Yes     & No & No  & Yes & No \\
@@ -1114,7 +1121,8 @@ and of wind data obtained from the NASA Langley Research Center
 Prediction of Worldwide Energy Resources (POWER) project, funded
 through the NASA Earth Science Division.
 
-% TODO(user): acknowledgments and funding, if any.
+\paragraph{Funding and competing interests.} This research received
+no external funding. The authors declare no competing interests.
 
 \bibliographystyle{apalike}
 \bibliography{references}
