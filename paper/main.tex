@@ -12,8 +12,12 @@
 \usepackage{booktabs}
 \usepackage{threeparttable}
 \usepackage{graphicx}
+\usepackage{flafter}
 \usepackage[round]{natbib}
 \usepackage{url}
+\makeatletter
+\g@addto@macro{\UrlBreaks}{\do\-\do\_}
+\makeatother
 \usepackage[hidelinks]{hyperref}
 
 \graphicspath{{figures/}}
@@ -29,11 +33,11 @@ jaime.pesca@uexternado.edu.co}\\
 \small Facultad de Administraci{\'o}n de Empresas, Universidad
 Externado de Colombia, Bogot{\'a}, Colombia
 \and
-Kiana Hikaru Ysa Morla\thanks{kiana.ysa@utec.edu.pe}\\
+Kiana Hikaru Ysa Morla\setcounter{footnote}{3}\thanks{kiana.ysa@utec.edu.pe}\\
 \small Universidad de Ingenier{\'i}a y Tecnolog{\'i}a (UTEC), Lima,
 Peru}
 
-\date{Draft of 13 September 2026}
+\date{}
 
 \begin{document}
 \maketitle
@@ -45,36 +49,48 @@ fire-to-water refill leg on every drop, so water point location, not
 base-to-fire distance alone, drives delivered water. We introduce the
 cycle-constrained aerial suppression base and water point location
 problem, the first to site bases and water refill points jointly with
-cycle-endogenous productivity, as a two-stage mean-risk (CVaR)
-stochastic program with an exact linearization and a fix-and-optimize
-matheuristic whose reduced subproblems are exact. An open-data case
+cycle-endogenous productivity, as a two-stage stochastic program with
+a mean-risk objective based on conditional value-at-risk (CVaR), an
+exact linearization, and a fix-and-optimize matheuristic whose reduced
+subproblems are exact. An open-data case
 study for Cundinamarca, Colombia, built around the country's Firehawk
 acquisition, shows a fleet-limited-first, physics-limited-second
 regime: budget dominates, uncalibrated growth constants act as a
 containability cliff, sequential bases-first planning matches the
 integrated optimum wherever certification is possible, and
-tractability collapses exactly where fleets and budget slack grow,
-which the matheuristic crosses.
+tractability collapses where fleets and budget slack grow, a regime
+the matheuristic still searches effectively, albeit without
+certificates.
 \end{abstract}
 
 \medskip
 \begin{sloppypar}
-\noindent\textbf{Keywords:} wildfire suppression; facility location;
-aerial firefighting; water refill points; two-stage stochastic
+\noindent\textbf{Keywords:} facility location; two-stage stochastic
 programming; conditional value-at-risk; sample average approximation;
-matheuristics; Colombia.
+mixed-integer linear programming; matheuristics; large neighborhood
+search; aerial wildfire suppression.
 \end{sloppypar}
 
 \section{Introduction}
 \label{sec:intro}
 
 Colombia's eastern Andean department of Cundinamarca leads the
-country's historical record of reported forest fires, and the extreme
-January 2024 fire episode around Bogot{\'a} placed aerial suppression
-at the center of national policy. In response, the Colombian Aerospace
-Force (FAC), with the national disaster risk management unit (UNGRD),
-committed 150{,}000 millones COP to acquire two Sikorsky S-70i Firehawk
-helicopters, the first of their class in Latin America \citep{fac2026}. A country buying firefighting aircraft faces
+country's historical record of reported forest fires, with 7,908
+events reported to the national risk management databases between
+1921 and April 2020, nearly twice those of the second-ranked
+department \citep{ungrdnd}. The extreme fire episode of January 2024
+around Bogot{\'a} prompted the declaration of a national disaster
+\citep{decreto2024}, and aerial means carried the weight of the
+emergency response, more than 755 flight hours and 2,170 water
+discharges by late February \citep{ungrd2024}. In its wake, the
+Colombian Aerospace Force (FAC, Fuerza Aeroespacial Colombiana) and
+the National Unit for Disaster Risk Management (UNGRD, Unidad
+Nacional para la Gesti{\'o}n del Riesgo de Desastres) committed 150
+billion Colombian pesos (COP, with billion denoting $10^9$
+throughout) to acquire two Sikorsky S-70 Firehawk helicopters
+\citep{fac2025}, reported as the first of their class in Latin
+America \citep{infodefensa2025}. A country buying firefighting
+aircraft faces
 an immediate strategic question that current models do not answer:
 where should the supporting bases and, critically, the water refill
 points be located, and how should a single budget be split among bases,
@@ -89,7 +105,7 @@ cycle, not by the base-to-fire leg, which is paid once. Aircraft
 productivity is therefore endogenous to the joint configuration of
 bases and water points. A classical facility location model built on
 base-to-fire distance alone, of the p-median family
-\citep{hakimi1964}, cannot represent this tradeoff, and, as
+\citep{mladenovic2007}, cannot represent this tradeoff, and, as
 Section~\ref{sec:lit} shows, no existing model sites bases and water
 points jointly with cycle-endogenous productivity.
 
@@ -99,35 +115,45 @@ problem as a two-stage stochastic program: first-stage decisions open
 bases, station aircraft, and enable water points under a single budget;
 second-stage recourse dispatches aircraft to fires scenario by
 scenario. The objective is a mean-risk convex combination of expected
-loss and conditional value-at-risk \citep{rockafellar2000}. Fire
+loss and conditional value-at-risk (CVaR) \citep{rockafellar2000}. Fire
 containment is physical: a fire is contained if the liters delivered
 within a critical window exceed a requirement that grows with arrival
 time and rate of spread, so no historical suppression outcome data,
 which do not exist for Colombia, are needed. The only nonlinearity, a
 bilinear product of dispatch and refill assignment, admits an exact
-McCormick linearization.
+McCormick linearization \citep{gupte2013}, yielding a mixed-integer
+linear program (MILP).
 
 Second, we develop a fix-and-optimize matheuristic
-\citep{helber2010} with large neighborhood search \citep{shaw1998}
+\citep{helber2010} with large neighborhood search \citep{pisinger2010}
 over the first-stage variables. Each iteration solves a reduced
 sub-MILP that is exact by construction, over a geographic neighborhood
 of candidate sites plus the incumbent's open sites; a probabilistic
 random destroy operator, standard in adaptive large neighborhood
 search \citep{ropke2006}, provably escapes a class of local optima
 that purely geographic neighborhoods cannot leave. The reduced
-sub-problem keeps the full scenario set, so every accepted move is a
-verified improvement for the true problem.
+sub-problem keeps the full scenario set, so, by construction, every
+accepted move is a feasible first-stage solution whose true objective
+improves the incumbent (Section~\ref{sec:method}).
 
 Third, we construct a fully sourced, replicable case study for
-Cundinamarca from open data only: NASA FIRMS satellite detections for
-all of 2024, clustered into events with ST-DBSCAN \citep{birant2007};
-land cover, slope, and wind from ESA WorldCover, SRTM, and NASA POWER;
+Cundinamarca from open data only: satellite fire detections for all of
+2024 from the Fire Information for Resource Management System (FIRMS)
+of the National Aeronautics and Space Administration (NASA), clustered
+into events with spatio-temporal density-based spatial clustering of
+applications with noise (ST-DBSCAN) \citep{birant2007}; land cover,
+slope, and wind from European Space Agency (ESA) WorldCover, the
+Shuttle Radar Topography Mission (SRTM), and NASA Prediction of
+Worldwide Energy Resources (POWER);
 population exposure from WorldPop, cross-checked against the Colombian
 census; 120 candidate bases from the national aerodrome index and
 5,449 candidate water points from OpenStreetMap and the regional water
-authority; and the real Firehawk's cost, tank, and speed. Every
-parameter is either traced to a verified source or explicitly declared
-an assumption and swept in the sensitivity analysis.
+authority; and the real Firehawk's cost, tank capacity, and cruise
+speed. Aircraft parameters are taken from the manufacturer's
+specification and the acquisition program's published figures;
+parameters that lack a calibrated Colombian source enter as explicit,
+disclosed assumptions and are explored over ranges in the sensitivity
+analysis.
 
 Fourth, our computational study yields policy-relevant structural
 findings rather than only benchmark numbers. Under the real program
@@ -146,14 +172,16 @@ tractability exactly where the integrated question becomes
 interesting, in multi-aircraft, high-budget-slack regimes, which is
 what motivates the matheuristic.
 
-The remainder of the paper is organized as follows.
-Section~\ref{sec:lit} reviews the literature and states the gap.
-Section~\ref{sec:model} formulates the model.
-Section~\ref{sec:data} describes the Cundinamarca case study data.
-Section~\ref{sec:method} presents the matheuristic.
-Section~\ref{sec:experiments} reports the computational study, and
-Section~\ref{sec:conclusions} concludes with limitations and ongoing
-work.
+The paper moves from the gap to the policy reading.
+Section~\ref{sec:lit} locates the three conditions no existing model
+meets jointly, which the formulation of Section~\ref{sec:model} is
+then built to satisfy; Section~\ref{sec:data} assembles the open-data
+Cundinamarca instance on which the model is solved;
+Section~\ref{sec:method} develops the matheuristic that carries the
+model beyond the direct solver's reach; Section~\ref{sec:experiments}
+derives the structural findings above from the computational study;
+and Section~\ref{sec:conclusions} closes with the limitations and the
+questions the results leave open.
 
 \section{Related work and gap}
 \label{sec:lit}
@@ -165,15 +193,21 @@ airtankers for Ontario with an expected-cost model over historical
 demand. Modern strategic deployment models keep this base-side focus:
 \citet{skold2024} locate aerial firefighting resources in Sweden with a
 binary program over wildfire risk data, and \citet{mendes2023} place
-wildland fire suppression resources on a landscape with mixed-integer
-programming and iterated local search. Stochastic treatments deploy
+wildland fire suppression resources on a landscape with an iterated
+local search metaheuristic benchmarked against exact mixed-integer
+programming solutions. Stochastic treatments deploy
 suppression resources across existing stations under fire-occurrence
 uncertainty: the scenario-based standard-response models of
 \citet{haight2007}, the simulation plus stochastic integer programming
 approach of \citet{ntaimo2013}, the two-stage seasonal deployment and
 dispatch design of \citet{wei2015}, which is the closest methodological
 comparator to our second stage, and the robust prepositioning of
-\citet{mendes2025}. Recent work also allocates heterogeneous aerial
+\citet{mendes2025}. \citet{huang2025} go further on the base side,
+siting new aviation rescue stations and configuring a heterogeneous
+helicopter fleet with a two-stage multi-objective stochastic model
+driven by satellite-based fire probabilities, yet with no water
+infrastructure and with losses driven by one-way response time rather
+than a refill cycle. Recent work also allocates heterogeneous aerial
 fleets across capacity-constrained airbases under efficiency and equity
 objectives \citep{tasias2026}. In all of these, water is either absent
 or exogenous.
@@ -185,14 +219,13 @@ reservoirs by fire risk with geotechnological methods, and
 transport in Valpara{\'i}so. Operational models capture the refill
 cycle but take infrastructure as given: \citet{rodriguezveiga2018}
 assign aircraft to flight routes and refueling points during
-suppression, \citet{rodriguezbarreiro2024} plan helicopter circuits
+suppression, \citet{rodriguezbarreiro2026} plan helicopter circuits
 including water loading points for a given fire, and
 \citet{skorinkapov2024} schedule aerial resources against zone-assigned
 water loading points. Closest in scope, \citet{maras2023} site both
 heliports and water sources with GIS-based multi-objective programming,
-but in two separate sequential deterministic models with fixed
-response-time thresholds, without a refill cycle and without
-uncertainty.
+but in two separate deterministic models with fixed response-time
+thresholds, without a refill cycle and without uncertainty.
 
 Table~\ref{tab:gap} classifies this literature against the three
 conditions that jointly define the gap: (a) joint siting of bases and
@@ -205,14 +238,14 @@ and no work combines cycle-dependent productivity with strategic,
 uncertainty-aware siting. The proposed model is the only row satisfying
 all three, under stochastic programming with a mean-risk CVaR
 objective. The nearest works each own a single pillar:
-\citet{maras2023} site both facility types but sequentially,
-deterministically, and without a cycle; \citet{rodriguezbarreiro2024}
+\citet{maras2023} site both facility types but separately,
+deterministically, and without a cycle; \citet{rodriguezbarreiro2026}
 capture the cycle, and even select loading points, but operationally,
 with given infrastructure; and \citet{wei2015} are strategic and
 stochastic but site no water and use coverage rather than a refill
 cycle.
 
-\begin{table}[t]
+\begin{table}[!htbp]
 \centering
 \begin{threeparttable}
 \caption{Classification of the related literature against the three
@@ -236,16 +269,17 @@ Reference & Bases & Water & Joint & Cyclic & Strategic & Uncertainty \\
 \midrule
 \citet{hodgson1978}                    & Yes     & No      & No & No  & Yes & No \\
 \citet{maclellan1996}\tnote{a}         & Yes     & No      & No & No  & Yes & No \\
-\citet{skold2024}\tnote{b}             & Yes     & No      & No & No  & Yes & No \\
+\citet{skold2024}\tnote{b}             & Partial & No      & No & No  & Yes & No \\
 \citet{haight2007}                     & Partial & No      & No & No  & Yes & SP \\
 \citet{ntaimo2013}                     & Partial & No      & No & No  & Yes & SP \\
 \citet{wei2015}                        & Partial & No      & No & No  & Yes & SP \\
 \citet{mendes2025}                     & Partial & No      & No & No  & Yes & RO \\
+\citet{huang2025}                      & Yes     & No      & No & No  & Yes & SP \\
 \citet{alfaro2024}                     & No      & Yes     & No & No  & Yes & No \\
 \citet{ramalho2021}                    & No      & Yes     & No & No  & Yes & No \\
 \citet{ramalho2024}                    & No      & Yes     & No & No  & Yes & No \\
 \citet{rodriguezveiga2018}             & No      & Partial & No & Yes & No  & No \\
-\citet{rodriguezbarreiro2024}\tnote{c} & No      & Partial & No & Yes & No  & No \\
+\citet{rodriguezbarreiro2026}\tnote{c} & No      & Partial & No & Yes & No  & No \\
 \citet{skorinkapov2024}\tnote{d}       & No      & Partial & No & No  & No  & No \\
 \citet{maras2023}                      & Yes     & Yes     & No & No  & Yes & No \\
 \midrule
@@ -256,12 +290,19 @@ Reference & Bases & Water & Joint & Cyclic & Strategic & Uncertainty \\
 \footnotesize
 \item[a] Minimizes expected cost over multi-season historical demand,
 without recourse.
-\item[b] Conference paper (ISCRAM proceedings).
-\item[c] arXiv preprint.
-\item[d] The Cyclic cell is confirmed only via a secondary paraphrase
-of the paywalled primary text (drop counts appear to be exogenous
-inputs); the remaining cells are confirmed against the openly available
-abstract.
+\item[b] Conference paper, in the proceedings of the International
+Conference on Information Systems for Crisis Response and Management
+(ISCRAM). Positions repositionable aerial resources at existing
+municipal locations for a specific day, preparedness rather than
+infrastructure siting, hence Partial.
+\item[c] Published version of the arXiv preprint 2409.07937; the cell
+classification was verified on the arXiv full text.
+\item[d] The version of record is paywalled; the Cyclic and Water
+cells are confirmed from the full text of the companion master's
+thesis of the paper's second author (publicly available), which
+restates the same model with drop counts per time slot as exogenous
+inputs and water points predetermined; the remaining cells are
+confirmed against the openly available abstract.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
@@ -283,10 +324,12 @@ requirement is contained; otherwise it escapes and its exposed
 population counts as loss.
 
 Table~\ref{tab:notation} summarizes the notation.
-Distances are in meters in the national planimetric CRS (EPSG:9377),
-time is in hours, and money is in Colombian pesos (COP).
+Distances are in meters in the national planimetric coordinate
+reference system (CRS), registered as code 9377 in the European
+Petroleum Survey Group (EPSG) geodetic registry (EPSG:9377); time is
+in hours, and money is in Colombian pesos (COP).
 
-\begin{table}[t]
+\begin{table}[!htbp]
 \centering
 \caption{Notation. Every fire-indexed quantity is scoped to its
 scenario: a bare $f$ means for $f \in F_s$ within scenario $s$.}
@@ -298,7 +341,7 @@ scenario: a bare $f$ means for $f \in F_s$ within scenario $s$.}
 $I$ & candidate aerial base sites, index $i$ \\
 $K$ & candidate water refill points, index $k$ \\
 $M$ & aircraft types, index $m$ (a single type in this study) \\
-$S$ & SAA scenario sample, index $s$, probability $p_s$ \\
+$S$ & scenario sample, index $s$, probability $p_s$ \\
 $F_s$ & fires in scenario $s$, index $f$ \\
 \midrule
 \multicolumn{2}{l}{\emph{Parameters}} \\
@@ -372,12 +415,14 @@ an exponential area growth form adopted as a phenomenological
 simplification for tractability, with $c$ in liters per square meter
 and $A_0$ in square meters ($A_0$ is quoted in hectares throughout the
 paper and converted exactly once in the implementation). We disclose
-its provenance precisely: exponential fire area growth is documented
-in structural fire science \citep{ramachandran1986};
-wildland-specific growth models are typically elliptical
-\citep{vanwagner1969} and empirical growth varies by fuel and weather,
-so Equation~\eqref{eq:requirement} is a modeling choice that fits a
-single scalar $\rho_f$ per fire, not a wildland-validated law. Its
+its provenance precisely: accelerating phenomenological growth curves
+are the standard design-fire description in structural fire safety
+engineering \citep{nilsson2014}; wildland-specific growth models are
+instead typically elliptical, propagating a fire front
+\citep{sullivan2009}; and observed wildland growth rates vary by
+orders of magnitude with fuel and weather \citep{balch2024}.
+Equation~\eqref{eq:requirement} is therefore a modeling choice that
+fits a single scalar $\rho_f$ per fire, not a wildland-validated law. Its
 constants $A_0$ and $c$ have no Colombia-specific calibration source
 and are treated as swept sensitivity parameters throughout
 (Section~\ref{sec:exp6}). The arrival time $t^{\mathrm{arr}}_f$ is
@@ -452,7 +497,8 @@ liters coupling is bilinear in the natural formulation, $q_{fs} =
 \sum L_{ifkm}\, x_{ifms} z_{fks}$; constraints \eqref{eq:mc1} to
 \eqref{eq:mc3} replace each product with the auxiliary $u_{ifkms}$
 through a McCormick envelope that is exact, not a relaxation, because
-$z_{fks}$ is binary and $x_{ifms} \le M_m$ is valid. Constraint
+$z_{fks}$ is binary and $x_{ifms} \le M_m$ is valid
+\citep{gupte2013}. Constraint
 \eqref{eq:containment} enforces physical containment, and
 \eqref{eq:loss} to \eqref{eq:cvar} define scenario loss and the CVaR
 linking. Scenario probabilities must sum to one; the mean-risk CVaR
@@ -461,8 +507,9 @@ because it silently arises when subsampling scenario sets without
 renormalizing.
 
 Section~\ref{sec:exp1} verifies computationally that the linearized
-model and the literal bilinear program solved with a nonconvex MIQCP
-solver return identical optimal values on real instances. The
+model and the literal bilinear program solved as a nonconvex
+mixed-integer quadratically constrained program (MIQCP) return
+identical optimal values on real instances. The
 auxiliary count $|I| \times |K|$ per fire and scenario is what makes
 the full 5,449-point water catalog intractable for the direct MILP and
 motivates the matheuristic of Section~\ref{sec:method}.
@@ -481,7 +528,7 @@ Sections~\ref{sec:exp6} and~\ref{sec:conclusions}.
 All data are open, and every processing decision is scripted in the
 companion repository. Figure~\ref{fig:studyarea} shows the study area.
 
-\begin{figure}[t]
+\begin{figure}[!htbp]
 \centering
 \includegraphics[width=0.72\textwidth]{fig_study_area}
 \caption{The Cundinamarca instance: 2,425 fire events detected during
@@ -492,8 +539,10 @@ water refill points, in the national planimetric CRS (EPSG:9377).}
 
 \subsection{Fire events and scenarios}
 
-Fire events come from NASA FIRMS VIIRS 375 m active fire detections
-\citep{firms} for the full calendar year 2024 over a Cundinamarca
+Fire events come from NASA FIRMS Visible Infrared Imaging Radiometer
+Suite (VIIRS) 375 m active fire detections
+\citep{firms,schroeder2014} for the full calendar year 2024 over a
+Cundinamarca
 bounding box: 4,719 raw detections reduce to 4,470 after coordinate
 validation, exact deduplication, and a nominal-confidence filter, and
 are clustered into 2,425 events with ST-DBSCAN \citep{birant2007},
@@ -503,16 +552,18 @@ anchored on revisit and persistence; sensitivity of the event catalog
 to both radii is part of the pipeline. Detections are projected to
 EPSG:9377, the national single-zone planimetric standard, before
 clustering. Our implementation adapts \citet{birant2007} in the way
-standard across the ST-DBSCAN software ecosystem: the original
-non-spatial attribute threshold becomes a continuous temporal radius
-intersected with the spatial one, and border points join the first
-cluster that reaches them.
+standard across public ST-DBSCAN implementations: the original's
+non-spatial attribute threshold and discrete temporal-neighbor
+prefilter become a single continuous temporal radius intersected with
+the spatial one, and its cluster-mean similarity gate is omitted;
+border points join the first cluster that reaches them, as in the
+original.
 
 A scenario is one historical calendar day, matching the stochastic
 unit of \citet{wei2015}: the 366-day pool of 2024 (282 days with at
 least one event) is bootstrap-resampled with replacement into $|S| =
 200$ equiprobable day scenarios under sample average approximation
-\citep{kleywegt2001}. Day scenarios keep the episode structure of
+(SAA) \citep{kleywegt2001}. Day scenarios keep the episode structure of
 constraint \eqref{eq:fleet} valid and assume fleet availability resets
 daily; cross-day dynamics are not modeled. The satellite record misses
 cloud-obscured fires and detects active burning rather than ignition,
@@ -528,16 +579,21 @@ e^{0.05\, \mathrm{slope}_f} \cdot (1 + 0.1\, \mathrm{wind}_f),
 \label{eq:ros}
 \end{equation}
 with land cover class from ESA WorldCover 10 m \citep{worldcover},
-slope in degrees from SRTM 30 m \citep{srtm} by Horn's method
-\citep{horn1981}, and wind in meters per second from NASA POWER
+slope in degrees from SRTM 30 m \citep{srtm,farr2007} by Horn's
+finite-difference method \citep{tang2011}, and wind in meters per
+second from NASA POWER
 \citep{nasapower} at each fire's location and date. The relative rates
-$r_{\mathrm{class}}$ are ordinally grounded in the fire behavior fuel
-models of \citet{anderson1982}, grass fastest, shrub intermediate,
-timber slower, non-burnable near zero; their absolute magnitude has no
+$r_{\mathrm{class}}$ are ordinally grounded in the standard fire
+behavior fuel models of \citet{scott2005}, grass fastest, shrub
+intermediate and strongly load-dependent, timber litter slower,
+non-burnable classes spreading none; their absolute magnitude has no
 Colombian calibration source, so the overall scale
-$\rho_{\mathrm{scale}}$ is a swept sensitivity parameter, and the
-exponential slope response follows \citet{rothermel1972} in form with
-an illustrative coefficient. The value at risk $D_f$ is the WorldPop
+$\rho_{\mathrm{scale}}$ is a swept sensitivity parameter. The
+exponential slope response follows the exponential slope corrections
+of the Australian McArthur-type models, as reviewed by
+\citet{sharples2008}, with an illustrative coefficient; the slope
+factor in Rothermel's own model is instead a tangent-squared form
+\citep{andrews2018}. The value at risk $D_f$ is the WorldPop
 2020 constrained population count \citep{worldpop} within 1 km of the
 fire, an unmonetized exposure index cross-checked at municipal level
 against the 2018 census \citep{dane2018}.
@@ -547,13 +603,16 @@ against the 2018 census \citep{dane2018}.
 The 120 candidate bases combine the national civil aerodrome index
 \citep{aerocivil2025} with military installations; the 5,449 candidate
 water points combine named OpenStreetMap water bodies \citep{osm} with
-the regional water authority's lagoon layer \citep{car2026}. The
-aircraft is the Sikorsky S-70i Firehawk that Colombia is acquiring
-\citep{fac2026}: 75{,}000 millones COP per unit (the program price of
-150{,}000 millones for two), a 1{,}000 gallon (3{,}785 liter) tank,
-snorkel refill in under one minute from water at least 45 cm deep,
-which is what makes lagoon-scale water points usable, and a 150 knot
-cruise (277.8 km per hour). The per-cycle overhead $\delta$ is the
+the lagoon layer of the regional water authority (Corporaci{\'o}n
+Aut{\'o}noma Regional de Cundinamarca, CAR) \citep{car2026}. The
+aircraft is the Sikorsky S-70 Firehawk that Colombia is acquiring
+\citep{fac2025}: 75 billion COP per unit (the program price of 150
+billion for two), a 1{,}000 gallon (3{,}785 liter) tank with snorkel
+refill in under one minute \citep{lockheedfirehawk} from water at
+least 45 cm deep, which is what makes lagoon-scale water points
+usable, and a nominal 150 knot cruise (277.8 km per hour), the figure
+most consistently reported by secondary sources, since the
+manufacturer publishes no cruise speed. The per-cycle overhead $\delta$ is the
 sourced sub-minute refill plus an assumed 30 second drop and
 positioning allowance.
 
@@ -567,7 +626,7 @@ Colombia-specific source and are declared illustrative sweep ranges,
 never calibrated values, a disclosure discipline we consider a
 methodological contribution of the case study.
 
-\begin{table}[t]
+\begin{table}[!htbp]
 \centering
 \begin{threeparttable}
 \caption{Base-case parameters, provenance, and sweep treatment.
@@ -579,7 +638,7 @@ Citations for each source appear in the accompanying text.}
 \toprule
 Parameter & Base case & Provenance & Sensitivity \\
 \midrule
-Budget $B$ & 150{,}000 M COP & real Firehawk program spend & swept 80 to 300 G \\
+Budget $B$ & 150 G COP & real Firehawk program spend & swept 80 to 300 G \\
 Window $W$ & 2.0 h & NWCG initial attack standard & swept 1, 2, 4, 8 h \\
 CVaR level $\alpha$ & 0.95 & standard in the CVaR literature & exp.\ 4 varies risk \\
 Risk weight $\lambda$ & 0.5 & midpoint convention & swept 0 to 1 \\
@@ -593,10 +652,11 @@ $c^{\mathrm{wat}}_k$ (uniform) & 50 M COP & US benchmarks, scaled & swept 15 to 
 \end{tabular}
 \begin{tablenotes}[flushleft]
 \footnotesize
-\item M denotes millones (millions); G denotes thousands of millones
-($10^9$ COP). Agency initial-attack standards genuinely differ, from
-two-hour containment \citep{nwcg2026} to next-morning control
-\citep{korkola2024}, hence the window sweep.
+\item M denotes millions of COP ($10^6$); G denotes billions of COP
+($10^9$). NWCG is the National Wildfire Coordinating Group. Agency
+initial-attack standards genuinely differ, from two-hour containment
+\citep{nwcg2026} to next-morning control \citep{korkola2024}, hence
+the window sweep.
 \item[a] The $A_0$ range runs from the NWCG size class A bound (0.1
 ha), through a size class B fire at the base case (1 ha), up to the
 area of a single VIIRS 375 m pixel (14 ha), the sensor's localization
@@ -613,9 +673,10 @@ The direct MILP is tractable only for truncated candidate sets: the
 linearization adds $|I| \times |K|$ auxiliaries per fire and scenario,
 over 650{,}000 per fire-scenario pair at the full catalog. We therefore
 solve the full problem with a fix-and-optimize matheuristic
-\citep{helber2010}, a MIP-based improvement scheme distinct from local
+\citep{helber2010}, an improvement scheme based on mixed-integer
+programming (MIP) and distinct from local
 branching \citep{fischetti2003}, with large neighborhood search
-\citep{shaw1998} over the first-stage variables.
+\citep{pisinger2010} over the first-stage variables.
 
 The incumbent is a first-stage solution $(y, w, n)$. Each iteration
 selects a neighborhood of candidate sites to free, builds a reduced
@@ -629,8 +690,9 @@ binary fixed at zero. Every accepted iteration is therefore a verified
 improvement of the true objective, and the sub-MILP size is bounded by
 the neighborhood, not the catalog.
 
-Neighborhood selection follows Shaw's relatedness principle in
-geographic form: a random seed site anchors each iteration, and the
+Neighborhood selection follows Shaw's relatedness principle
+\citep{pisinger2010} in geographic form: a random seed site anchors
+each iteration, and the
 nearest candidate bases and water points to it are freed together,
 matching the problem's own coupling, since sites an aircraft would
 cycle between are exactly the sites worth reconsidering jointly. Pure
@@ -691,7 +753,7 @@ evidently linearizes the binary product internally at least as well.
 The linearized model remains the formulation of record because it is
 solver-portable and is the sub-problem the matheuristic solves.
 
-\begin{table}[t]
+\begin{table}[!htbp]
 \centering
 \caption{Experiment 1: linearized MILP versus literal bilinear
 formulation, two real scenarios (15 fires), base-case parameters.
@@ -729,7 +791,7 @@ cheap bases alone leave a 69 percent gap at the same limit
 (Section~\ref{sec:exp6}), and this is precisely the regime where the
 integrated question matters.
 
-\begin{figure}[t]
+\begin{figure}[!htbp]
 \centering
 \includegraphics[width=0.8\textwidth]{fig_runtime}
 \caption{Direct integrated MILP wall-clock time at 20 bases, 50 water
@@ -762,7 +824,7 @@ operator is what makes the search reliable, and sub-solve cost scales
 multiplicatively in both neighborhood dimensions, consistent with the
 $|I| \times |K|$ auxiliary count.
 
-\begin{figure}[t]
+\begin{figure}[!htbp]
 \centering
 \includegraphics[width=0.62\textwidth]{fig_tuning}
 \caption{Matheuristic tuning sweep (24 configurations, five seeds
@@ -855,7 +917,7 @@ $\CVaR_{0.95}$ equals the worst-scenario loss, the expected
 small-sample behavior under SAA, which the replication analysis of
 Section~\ref{sec:saa} quantifies.
 
-\begin{figure}[t]
+\begin{figure}[!htbp]
 \centering
 \includegraphics[width=0.95\textwidth]{fig_exp4}
 \caption{Experiment 4: risk-attitude sweep. Left: expected loss.
@@ -917,6 +979,15 @@ two aircraft and improves the base case by 18 percent (incumbent at a
 though there the remaining gap is essentially 100 percent, the
 tractability cliff of Section~\ref{sec:exp2}.
 
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=0.62\textwidth]{fig_exp6_budget}
+\caption{Experiment 6, budget axis: the dominant sensitivity axis.
+Annotations give the fleet size fielded. Open markers are 1,800 s
+incumbents (upper bounds on the optimum).}
+\label{fig:exp6}
+\end{figure}
+
 The containment constants now matter too, and they matter as a cliff
 rather than a dial. The base case contains 7 of 81 fires: one
 aircraft, one fire per day-scenario, and not every day's best fire is
@@ -956,15 +1027,6 @@ simplification, which understates single-aircraft capacity and
 correspondingly overstates the marginal value of additional
 aircraft.
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.62\textwidth]{fig_exp6_budget}
-\caption{Experiment 6, budget axis: the dominant sensitivity axis.
-Annotations give the fleet size fielded. Open markers are 1,800 s
-incumbents (upper bounds on the optimum).}
-\label{fig:exp6}
-\end{figure}
-
 \subsection{The plan on the ground}
 \label{sec:ground}
 
@@ -984,8 +1046,8 @@ percent of the requirement (30,283 liters delivered against a 30,000
 liter requirement on the tightest day): the water-cycle coupling is
 the binding margin of every single containment, not a theoretical
 nicety. The worst scenario in the CVaR tail is the real day of 15
-January 2024, eighteen simultaneous fires, the very episode that
-motivated the Firehawk program.
+January 2024, eighteen simultaneous fires, the very episode in whose
+wake the Firehawk acquisition was announced.
 
 Three operational readings follow, stated with the caveat that
 several bases tie as alternate optima (Cerritos, Colombaima, and
@@ -1008,7 +1070,7 @@ attack sizes above five hectares nothing is containable, so the
 value of the acquisition rides on detection-to-dispatch speed as
 much as on where anything is sited.
 
-\section{Conclusions, limitations, and ongoing work}
+\section{Conclusions, limitations, and future research}
 \label{sec:conclusions}
 
 We introduced the first model that jointly sites aerial suppression
@@ -1052,7 +1114,15 @@ experiment script, and the verification log of every decision and
 citation are available in the companion repository; raw data are
 redistributable open sources referenced above.
 
-% TODO(user): acknowledgments and funding, if any.
+\paragraph{Data acknowledgment.} We acknowledge the use of data from
+the NASA Fire Information for Resource Management System (FIRMS),
+part of the NASA Earth Science Data and Information System (ESDIS),
+and of wind data obtained from the NASA Langley Research Center
+Prediction of Worldwide Energy Resources (POWER) project, funded
+through the NASA Earth Science Division.
+
+\paragraph{Funding and competing interests.} This research received
+no external funding. The authors declare no competing interests.
 
 \bibliographystyle{apalike}
 \bibliography{references}

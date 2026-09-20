@@ -9,26 +9,6 @@
 
 % ---------- methodology ----------
 
-@article{dantzig1955,
-  author  = {Dantzig, George B.},
-  title   = {Linear programming under uncertainty},
-  journal = {Management Science},
-  volume  = {1},
-  number  = {3-4},
-  pages   = {197-206},
-  year    = {1955}
-}
-
-@article{beale1955,
-  author  = {Beale, E. M. L.},
-  title   = {On minimizing a convex function subject to linear inequalities},
-  journal = {Journal of the Royal Statistical Society, Series B},
-  volume  = {17},
-  number  = {2},
-  pages   = {173-184},
-  year    = {1955}
-}
-
 @article{rockafellar2000,
   author  = {Rockafellar, R. Tyrrell and Uryasev, Stanislav},
   title   = {Optimization of conditional value-at-risk},
@@ -36,7 +16,8 @@
   volume  = {2},
   number  = {3},
   pages   = {21-41},
-  year    = {2000}
+  year    = {2000},
+  doi     = {10.21314/JOR.2000.038}
 }
 
 @article{kleywegt2001,
@@ -46,18 +27,21 @@
   volume  = {12},
   number  = {2},
   pages   = {479-502},
-  year    = {2002}
+  year    = {2002},
+  doi     = {10.1137/S1052623499363220}
 }
 
-@inproceedings{shaw1998,
-  author    = {Shaw, Paul},
-  title     = {Using constraint programming and local search methods to solve vehicle routing problems},
-  booktitle = {Principles and Practice of Constraint Programming, CP98},
-  series    = {Lecture Notes in Computer Science},
-  volume    = {1520},
-  pages     = {417-431},
+@incollection{pisinger2010,
+  author    = {Pisinger, David and Ropke, Stefan},
+  title     = {Large neighborhood search},
+  booktitle = {Handbook of Metaheuristics},
+  editor    = {Gendreau, Michel and Potvin, Jean-Yves},
+  series    = {International Series in Operations Research \& Management Science},
+  pages     = {399-419},
   publisher = {Springer},
-  year      = {1998}
+  address   = {New York},
+  year      = {2010},
+  doi       = {10.1007/978-1-4419-1665-5_13}
 }
 
 @article{helber2010,
@@ -67,7 +51,8 @@
   volume  = {123},
   number  = {2},
   pages   = {247-256},
-  year    = {2010}
+  year    = {2010},
+  doi     = {10.1016/j.ijpe.2009.08.022}
 }
 
 @article{fischetti2003,
@@ -77,7 +62,19 @@
   volume  = {98},
   number  = {1-3},
   pages   = {23-47},
-  year    = {2003}
+  year    = {2003},
+  doi     = {10.1007/s10107-003-0395-5}
+}
+
+@article{gupte2013,
+  author  = {Gupte, Akshay and Ahmed, Shabbir and Cheon, Myun Seok and Dey, Santanu},
+  title   = {Solving mixed integer bilinear problems using {MILP} formulations},
+  journal = {SIAM Journal on Optimization},
+  volume  = {23},
+  number  = {2},
+  pages   = {721-744},
+  year    = {2013},
+  doi     = {10.1137/110836183}
 }
 
 @article{ropke2006,
@@ -93,55 +90,89 @@
 
 % ---------- fire science and geodata methods ----------
 
-@article{ramachandran1986,
-  author  = {Ramachandran, Ganapathy},
-  title   = {Exponential model of fire growth},
-  journal = {Fire Safety Science},
-  volume  = {1},
-  pages   = {657-666},
-  year    = {1986},
-  note    = {Structural fire science; cited here only as the source of the exponential area growth assumption, not as a wildland-fire validation}
+@inproceedings{nilsson2014,
+  author    = {Nilsson, M. and Johansson, N. and Van Hees, P.},
+  title     = {A new method for quantifying fire growth rates using statistical and empirical data: Applied to determine the effect of arson},
+  booktitle = {Fire Safety Science: Proceedings of the Eleventh International Symposium},
+  volume    = {11},
+  pages     = {517-530},
+  year      = {2014},
+  doi       = {10.3801/IAFSS.FSS.11-517}
 }
 
-@article{vanwagner1969,
-  author  = {Van Wagner, C. E.},
-  title   = {A simple fire growth model},
-  journal = {Forestry Chronicle},
-  volume  = {45},
+@article{sullivan2009,
+  author  = {Sullivan, Andrew L.},
+  title   = {Wildland surface fire spread modelling, 1990-2007. 3: {Simulation} and mathematical analogue models},
+  journal = {International Journal of Wildland Fire},
+  volume  = {18},
+  number  = {4},
+  pages   = {387-403},
+  year    = {2009},
+  doi     = {10.1071/WF06144}
+}
+
+@article{balch2024,
+  author  = {Balch, Jennifer K. and Iglesias, Virginia and Mahood, Adam L. and Cook, Maxwell C. and Amaral, Cibele and DeCastro, Amy and Leyk, Stefan and McIntosh, Tyler L. and Nagy, R. Chelsea and {St. Denis}, Lise and Tuff, Ty and Verleye, Erick and Williams, A. Park and Kolden, Crystal A.},
+  title   = {The fastest-growing and most destructive fires in the {US} (2001 to 2020)},
+  journal = {Science},
+  volume  = {386},
+  number  = {6720},
+  pages   = {425-431},
+  year    = {2024},
+  doi     = {10.1126/science.adk5737}
+}
+
+@article{sharples2008,
+  author  = {Sharples, Jason J.},
+  title   = {Review of formal methodologies for wind-slope correction of wildfire rate of spread},
+  journal = {International Journal of Wildland Fire},
+  volume  = {17},
   number  = {2},
-  pages   = {103-104},
-  year    = {1969}
+  pages   = {179-193},
+  year    = {2008},
+  doi     = {10.1071/WF06156}
 }
 
-@techreport{rothermel1972,
-  author      = {Rothermel, Richard C.},
-  title       = {A mathematical model for predicting fire spread in wildland fuels},
-  institution = {USDA Forest Service, Intermountain Forest and Range Experiment Station},
-  type        = {Research Paper},
-  number      = {INT-115},
-  address     = {Ogden, UT},
-  year        = {1972}
-}
-
-@techreport{anderson1982,
-  author      = {Anderson, Hal E.},
-  title       = {Aids to determining fuel models for estimating fire behavior},
-  institution = {USDA Forest Service, Intermountain Forest and Range Experiment Station},
+@techreport{andrews2018,
+  author      = {Andrews, Patricia L.},
+  title       = {The {Rothermel} surface fire spread model and associated developments: A comprehensive explanation},
+  institution = {USDA Forest Service, Rocky Mountain Research Station},
   type        = {General Technical Report},
-  number      = {INT-122},
-  address     = {Ogden, UT},
-  year        = {1982}
+  number      = {RMRS-GTR-371},
+  address     = {Fort Collins, CO},
+  year        = {2018}
 }
 
-@article{horn1981,
-  author  = {Horn, Berthold K. P.},
-  title   = {Hill shading and the reflectance map},
-  journal = {Proceedings of the IEEE},
-  volume  = {69},
-  number  = {1},
-  pages   = {14-47},
-  year    = {1981},
-  doi     = {10.1109/PROC.1981.11918}
+@techreport{scott2005,
+  author      = {Scott, Joe H. and Burgan, Robert E.},
+  title       = {Standard fire behavior fuel models: A comprehensive set for use with {Rothermel's} surface fire spread model},
+  institution = {USDA Forest Service, Rocky Mountain Research Station},
+  type        = {General Technical Report},
+  number      = {RMRS-GTR-153},
+  address     = {Fort Collins, CO},
+  year        = {2005}
+}
+
+@inproceedings{tang2011,
+  author    = {Tang, J. and Pilesj{\"o}, P.},
+  title     = {Estimating slope from raster data: A test of eight different algorithms in flat, undulating and steep terrain},
+  booktitle = {River Basin Management VI},
+  series    = {WIT Transactions on Ecology and the Environment},
+  volume    = {146},
+  pages     = {143-154},
+  publisher = {WIT Press},
+  year      = {2011},
+  doi       = {10.2495/RM110131}
+}
+
+@article{farr2007,
+  author  = {Farr, Tom G. and Rosen, Paul A. and Caro, Edward and Crippen, Robert and Duren, Riley and Hensley, Scott and Kobrick, Michael and Paller, Mimi and Rodriguez, Ernesto and Roth, Ladislav and Seal, David and Shaffer, Scott and Shimada, Joanne and Umland, Jeffrey and Werner, Marian and Oskin, Michael and Burbank, Douglas and Alsdorf, Douglas},
+  title   = {The {Shuttle Radar Topography Mission}},
+  journal = {Reviews of Geophysics},
+  volume  = {45},
+  pages   = {RG2004},
+  year    = {2007},
+  doi     = {10.1029/2005RG000183}
 }
 
 @article{birant2007,
@@ -156,10 +187,11 @@
 }
 
 @article{korkola2024,
-  author  = {Korkola, K. and Wheatley, M. and Beverly, J. and James, P. M. A. and Wotton, M.},
+  author  = {Korkola, Kennedy and Wheatley, Melanie and Beverly, Jennifer and James, Patrick M. A. and Wotton, Mike},
   title   = {A comparative analysis of wildfire initial attack containment objectives and modelling strategies in {Ontario}, {Canada}},
   journal = {International Journal of Wildland Fire},
   volume  = {33},
+  number  = {12},
   pages   = {WF24104},
   year    = {2024},
   doi     = {10.1071/WF24104}
@@ -180,6 +212,7 @@
   title   = {Location-allocation models for one-strike initial attack of forest fires by airtankers},
   journal = {Canadian Journal of Forest Research},
   volume  = {8},
+  number  = {2},
   pages   = {145-154},
   year    = {1978},
   doi     = {10.1139/x78-024}
@@ -201,7 +234,8 @@
   title     = {Using optimization modeling to determine locations for aerial firefighting resources based on wildfire risk data},
   booktitle = {Proceedings of the 21st International ISCRAM Conference},
   address   = {M{\"u}nster, Germany},
-  year      = {2024}
+  year      = {2024},
+  doi       = {10.59297/bvpahd97}
 }
 
 @article{haight2007,
@@ -211,7 +245,8 @@
   volume  = {45},
   number  = {1},
   pages   = {31-39},
-  year    = {2007}
+  year    = {2007},
+  doi     = {10.3138/infor.45.1.31}
 }
 
 @article{ntaimo2013,
@@ -232,18 +267,19 @@
   volume  = {61},
   number  = {6},
   pages   = {1021-1032},
-  year    = {2015}
+  year    = {2015},
+  doi     = {10.5849/forsci.14-182}
 }
 
-@article{hakimi1964,
-  author  = {Hakimi, S. Louis},
-  title   = {Optimum locations of switching centers and the absolute centers and medians of a graph},
-  journal = {Operations Research},
-  volume  = {12},
+@article{mladenovic2007,
+  author  = {Mladenovi{\'c}, Nenad and Brimberg, Jack and Hansen, Pierre and Moreno-P{\'e}rez, Jos{\'e} A.},
+  title   = {The p-median problem: A survey of metaheuristic approaches},
+  journal = {European Journal of Operational Research},
+  volume  = {179},
   number  = {3},
-  pages   = {450-459},
-  year    = {1964},
-  doi     = {10.1287/opre.12.3.450}
+  pages   = {927-939},
+  year    = {2007},
+  doi     = {10.1016/j.ejor.2005.05.034}
 }
 
 @article{mendes2023,
@@ -253,7 +289,8 @@
   volume  = {304},
   number  = {3},
   pages   = {887-900},
-  year    = {2023}
+  year    = {2023},
+  doi     = {10.1016/j.ejor.2022.04.037}
 }
 
 @article{mendes2025,
@@ -265,6 +302,16 @@
   pages   = {1312-1342},
   year    = {2025},
   doi     = {10.1111/itor.13524}
+}
+
+@article{huang2025,
+  author  = {Huang, Jun and Zhao, Qiuhong},
+  title   = {Data driven multi-objective optimization of sustainable aviation emergency network for forest fire rescue},
+  journal = {Sustainable Operations and Computers},
+  volume  = {6},
+  pages   = {116-129},
+  year    = {2025},
+  doi     = {10.1016/j.susoc.2025.04.001}
 }
 
 @article{alfaro2024,
@@ -279,7 +326,7 @@
 }
 
 @article{ramalho2021,
-  author  = {Ramalho, A. H. C. and da Silva, Evandro Ferreira and Silva, J. and Fiedler, N. and Maffioletti, Fernanda Dalfi{\'o}r and Biazatti, Leonardo Duarte and Moreira, T. R. and Juvanhol, R. and dos Santos, A. R.},
+  author  = {Ramalho, Antonio Henrique Cordeiro and da Silva, Evandro Ferreira and Silva, J{\'e}ferson Pereira Martins and Fiedler, Nilton Cesar and Maffioletti, Fernanda Dalfior and Biazatti, Leonardo Duarte and Moreira, Ta{\'i}s Rizzo and Juvanhol, Ronie Silva and dos Santos, Alexandre Rosa},
   title   = {Allocation of water reservoirs to fight forest fires according to the risk of occurrence},
   journal = {Journal of Environmental Management},
   volume  = {296},
@@ -305,15 +352,19 @@
   volume  = {64},
   number  = {5},
   pages   = {504-514},
-  year    = {2018}
+  year    = {2018},
+  doi     = {10.1093/forsci/fxy012}
 }
 
-@misc{rodriguezbarreiro2024,
-  author       = {Rodr{\'i}guez Barreiro, Marta and Ginzo Villamayor, Mar{\'i}a Jos{\'e} and P{\'e}rez Porras, Fernando and Carpente Rodr{\'i}guez, Mar{\'i}a Luisa and Lorenzo Freire, Silvia Mar{\'i}a},
-  title        = {On an optimization model for firefighting helicopter planning},
-  howpublished = {arXiv preprint arXiv:2409.07937},
-  year         = {2024},
-  doi          = {10.48550/arXiv.2409.07937}
+@article{rodriguezbarreiro2026,
+  author  = {Rodr{\'i}guez Barreiro, Marta and Ginzo Villamayor, Mar{\'i}a Jos{\'e} and P{\'e}rez Porras, Fernando and Carpente Rodr{\'i}guez, Mar{\'i}a Luisa and Lorenzo Freire, Silvia Mar{\'i}a},
+  title   = {A practical decision support tool for aerial coordinators in wildfires: Planning helicopter operations},
+  journal = {Socio-Economic Planning Sciences},
+  volume  = {105},
+  pages   = {102475},
+  year    = {2026},
+  doi     = {10.1016/j.seps.2026.102475},
+  note    = {Published version of the arXiv preprint 2409.07937}
 }
 
 @article{skorinkapov2024,
@@ -352,23 +403,35 @@
   author       = {{NASA FIRMS}},
   title        = {{Fire Information for Resource Management System}: {VIIRS} 375 m active fire product ({SNPP})},
   howpublished = {\url{https://firms.modaps.eosdis.nasa.gov/}},
-  note         = {Calendar year 2024 archive download for Cundinamarca, accessed 30 August 2026},
+  note         = {Calendar year 2024 archive download for Cundinamarca, accessed 30 August 2026. The provider's recommended product citation is Schroeder et al. (2014), cited alongside this entry},
   year         = {2026}
 }
 
+@article{schroeder2014,
+  author  = {Schroeder, Wilfrid and Oliva, Patricia and Giglio, Louis and Csiszar, Ivan A.},
+  title   = {The {New VIIRS} 375 m active fire detection data product: Algorithm description and initial assessment},
+  journal = {Remote Sensing of Environment},
+  volume  = {143},
+  pages   = {85-96},
+  year    = {2014},
+  doi     = {10.1016/j.rse.2013.12.008}
+}
+
 @misc{worldcover,
-  author       = {{ESA}},
-  title        = {{ESA WorldCover} 10 m 2021 v200 land cover product},
-  howpublished = {\url{https://esa-worldcover.org/}},
-  note         = {Tiles N03W075 and N03W078, retrieved from the AWS Open Data mirror, accessed 21 August 2026},
-  year         = {2021}
+  author       = {Zanaga, D. and Van De Kerchove, R. and Daems, D. and De Keersmaecker, W. and Brockmann, C. and Kirches, G. and Wevers, J. and Cartus, O. and Santoro, M. and Fritz, S. and Lesiv, M. and Herold, M. and Tsendbazar, N.-E. and Xu, P. and Ramoino, F. and Arino, O.},
+  title        = {{ESA WorldCover} 10 m 2021 v200},
+  howpublished = {Zenodo},
+  doi          = {10.5281/zenodo.7254221},
+  note         = {Provider's requested citation. Contains modified Copernicus Sentinel data (2021) processed by the ESA WorldCover consortium. Tiles N03W075 and N03W078, retrieved from the AWS Open Data mirror, accessed 21 August 2026},
+  year         = {2022}
 }
 
 @misc{srtm,
-  author       = {{NASA}},
-  title        = {{Shuttle Radar Topography Mission} ({SRTM} {GL1}) 30 m digital elevation data},
-  howpublished = {\url{https://opentopography.org/}},
-  note         = {16 one-degree tiles covering Cundinamarca, retrieved from the OpenTopography mirror, accessed 21 August 2026},
+  author       = {{NASA JPL}},
+  title        = {{NASA Shuttle Radar Topography Mission Global 1 arc second} ({SRTMGL1} {V003})},
+  howpublished = {NASA Land Processes Distributed Active Archive Center},
+  doi          = {10.5067/MEaSUREs/SRTM/SRTMGL1.003},
+  note         = {16 one-degree tiles covering Cundinamarca, retrieved from the OpenTopography mirror (opentopography.org), accessed 21 August 2026},
   year         = {2013}
 }
 
@@ -376,15 +439,16 @@
   author       = {{NASA POWER}},
   title        = {{Prediction of Worldwide Energy Resources} point data ({MERRA-2} reanalysis)},
   howpublished = {\url{https://power.larc.nasa.gov/}},
-  note         = {Daily 10 m wind speed per fire location and date, accessed 21 August 2026},
+  note         = {Daily 10 m wind speed per fire location and date, from the daily point-query service; MERRA-2 denotes the Modern-Era Retrospective analysis for Research and Applications, version 2. The provider requests acknowledgment of the NASA Langley Research Center POWER Project, funded through the NASA Earth Science Division. Accessed 21 August 2026},
   year         = {2026}
 }
 
 @misc{worldpop,
-  author       = {{WorldPop}},
-  title        = {{Colombia} 2020 constrained population count raster (100 m)},
-  howpublished = {\url{https://www.worldpop.org/}},
-  note         = {Building-footprint constrained product, accessed 24 August 2026},
+  author       = {Bondarenko, M. and Kerr, D. and Sorichetta, A. and Tatem, A. J.},
+  title        = {Census/projection-disaggregated gridded population datasets for 189 countries in 2020 using {Built-Settlement Growth Model} ({BSGM}) outputs},
+  howpublished = {WorldPop, University of Southampton},
+  doi          = {10.5258/SOTON/WP00684},
+  note         = {Provider's requested citation for the {Colombia} 2020 constrained 100 m population raster, accessed 24 August 2026},
   year         = {2020}
 }
 
@@ -392,15 +456,15 @@
   author       = {{DANE}},
   title        = {{Censo Nacional de Poblaci{\'o}n y Vivienda 2018}, {Marco Geoestad{\'i}stico Nacional} integrado},
   howpublished = {\url{https://geoportal.dane.gov.co/}},
-  note         = {Municipal population field STP27\_PERS, verified against the DANE field dictionary (GIT MGN, September 2020), accessed 30 August 2026},
+  note         = {DANE, Departamento Administrativo Nacional de Estad{\'i}stica. Municipal population field STP27\_PERS, verified against the DANE field dictionary (GIT MGN, September 2020), accessed 30 August 2026},
   year         = {2018}
 }
 
 @misc{aerocivil2025,
   author       = {{Aerocivil}},
   title        = {{AIP} {Colombia}, {AD} 1.3: {\'I}ndice de aer{\'o}dromos},
-  howpublished = {\url{https://www.aerocivil.gov.co/}},
-  note         = {Aerodrome index with coordinates, 2025 edition, accessed 18 August 2026},
+  howpublished = {\url{https://www.aerocivil.gov.co/documentos/1118/conjunto-de-datos-aip/}},
+  note         = {Aerocivil, Unidad Administrativa Especial de Aeron{\'a}utica Civil; AIP, Aeronautical Information Publication. Aerodrome index with coordinates, 2025 edition, accessed 18 August 2026},
   year         = {2025}
 }
 
@@ -408,22 +472,62 @@
   author       = {{OpenStreetMap contributors}},
   title        = {{OpenStreetMap} water body data for {Cundinamarca}},
   howpublished = {\url{https://www.openstreetmap.org/}},
-  note         = {ODbL 1.0; 425 named water bodies retrieved 18 August 2026},
+  note         = {Open Database License (ODbL) 1.0; 425 named water bodies retrieved 18 August 2026},
   year         = {2026}
 }
 
 @misc{car2026,
   author       = {{CAR Cundinamarca}},
   title        = {{Corporaci{\'o}n Aut{\'o}noma Regional de Cundinamarca}, capa de lagunas ({ArcGIS} {REST})},
-  howpublished = {\url{https://sig.car.gov.co/}},
+  howpublished = {\url{https://sig.car.gov.co/arcgis/rest/services}},
   note         = {5,024 lagoon polygons retrieved 18 August 2026},
   year         = {2026}
 }
 
-@misc{fac2026,
+@misc{fac2025,
   author       = {{Fuerza Aeroespacial Colombiana}},
-  title        = {Adquisici{\'o}n de dos helic{\'o}pteros {Sikorsky} {S-70i} {Firehawk} para la respuesta a incendios forestales},
-  howpublished = {\url{https://www.fac.mil.co/}},
-  note         = {Program cost of 150,000 millones COP for two units, corroborated by presidencia.gov.co; accessed 30 August 2026},
+  title        = {Llega a {Colombia} el {Firehawk}, uno de los helic{\'o}pteros m{\'a}s vers{\'a}tiles del mundo en atenci{\'o}n de emergencias},
+  howpublished = {\url{https://www.fac.mil.co/es/noticias/llega-colombia-el-firehawk-uno-de-los-helicopteros-mas-versatiles-del-mundo-en-atencion-de}},
+  note         = {11 July 2025. Convenio of COP 150 billion with the UNGRD for two Firehawk helicopters, signed at F-AIR Colombia 2025; reprinted by the UNGRD at portal.gestiondelriesgo.gov.co. Accessed 19 September 2026},
+  year         = {2025}
+}
+
+@misc{infodefensa2025,
+  author       = {{Infodefensa}},
+  title        = {{Colombia} incorpora dos helic{\'o}pteros {Firehawk} {S-70} para fortalecer la respuesta ante emergencias},
+  howpublished = {\url{https://www.infodefensa.com/texto-diario/mostrar/5366947/012-fair-colombia-incorpora-firehawk-s70-fortalecer-respuesta-ante-emergencias}},
+  note         = {16 July 2025. Reports Colombia as the first country outside the United States to adopt the model for wildfire response. Accessed 19 September 2026},
+  year         = {2025}
+}
+
+@misc{lockheedfirehawk,
+  author       = {{Lockheed Martin}},
+  title        = {Sikorsky {Firehawk} helicopter},
+  howpublished = {\url{https://www.lockheedmartin.com/en-us/products/sikorsky-firehawk.html}},
+  note         = {Product page: 1,000 gallon belly tank; the manufacturer's 2019 delivery release documents snorkel refill in under one minute. Accessed 19 September 2026},
   year         = {2026}
+}
+
+@misc{decreto2024,
+  author       = {{Presidencia de la Rep{\'u}blica de Colombia}},
+  title        = {Decreto 0037 del 27 de enero de 2024, por el cual se declara una situaci{\'o}n de desastre nacional en todo el territorio nacional},
+  howpublished = {\url{https://portal.gestiondelriesgo.gov.co/Documents/Normatividad/Decreto-0037-Enero-27-2024.pdf}},
+  note         = {Diario Oficial 52651, 27 January 2024. Accessed 19 September 2026},
+  year         = {2024}
+}
+
+@misc{ungrd2024,
+  author       = {{UNGRD}},
+  title        = {{UNGRD} contin{\'u}a su lucha para controlar los incendios forestales en el pa{\'i}s},
+  howpublished = {\url{https://portal.gestiondelriesgo.gov.co/Paginas/Noticias/2024/UNGRD-continua-su-lucha-para-controlar-los-incendios-forestales-en-el-pais.aspx}},
+  note         = {Operational balance, 25 February 2024: 755 flight hours and 2,170 aerial water discharges by state and private aircraft during the emergency. Accessed 19 September 2026},
+  year         = {2024}
+}
+
+@misc{ungrdnd,
+  author       = {{UNGRD}},
+  title        = {Riesgo por incendio forestal: caracterizaci{\'o}n general},
+  howpublished = {\url{http://repositorio.gestiondelriesgo.gov.co/handle/20.500.11762/36815}},
+  note         = {Undated institutional risk characterization; forest fire reports from the {UNGRD} and Desinventar databases, 1921 to April 2020 (Cundinamarca 7,908 reports; Boyac{\'a}, second ranked, 4,107). Accessed 19 September 2026},
+  year         = {n.d.}
 }
