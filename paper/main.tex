@@ -104,7 +104,7 @@ cycle, not by the base-to-fire leg, which is paid once. Aircraft
 productivity is therefore endogenous to the joint configuration of
 bases and water points. A classical facility location model built on
 base-to-fire distance alone, of the p-median family
-\citep{hakimi1964}, cannot represent this tradeoff, and, as
+\citep{mladenovic2007}, cannot represent this tradeoff, and, as
 Section~\ref{sec:lit} shows, no existing model sites bases and water
 points jointly with cycle-endogenous productivity.
 
@@ -124,7 +124,7 @@ McCormick linearization \citep{gupte2013}, yielding a mixed-integer
 linear program (MILP).
 
 Second, we develop a fix-and-optimize matheuristic
-\citep{helber2010} with large neighborhood search \citep{shaw1998}
+\citep{helber2010} with large neighborhood search \citep{pisinger2010}
 over the first-stage variables. Each iteration solves a reduced
 sub-MILP that is exact by construction, over a geographic neighborhood
 of candidate sites plus the incumbent's open sites; a probabilistic
@@ -403,12 +403,14 @@ an exponential area growth form adopted as a phenomenological
 simplification for tractability, with $c$ in liters per square meter
 and $A_0$ in square meters ($A_0$ is quoted in hectares throughout the
 paper and converted exactly once in the implementation). We disclose
-its provenance precisely: exponential fire area growth is documented
-in structural fire science \citep{ramachandran1986};
-wildland-specific growth models are typically elliptical
-\citep{vanwagner1969} and empirical growth varies by fuel and weather,
-so Equation~\eqref{eq:requirement} is a modeling choice that fits a
-single scalar $\rho_f$ per fire, not a wildland-validated law. Its
+its provenance precisely: accelerating phenomenological growth curves
+are the standard design-fire description in structural fire safety
+engineering \citep{nilsson2014}; wildland-specific growth models are
+instead typically elliptical, propagating a fire front
+\citep{sullivan2009}; and observed wildland growth rates vary by
+orders of magnitude with fuel and weather \citep{balch2024}.
+Equation~\eqref{eq:requirement} is therefore a modeling choice that
+fits a single scalar $\rho_f$ per fire, not a wildland-validated law. Its
 constants $A_0$ and $c$ have no Colombia-specific calibration source
 and are treated as swept sensitivity parameters throughout
 (Section~\ref{sec:exp6}). The arrival time $t^{\mathrm{arr}}_f$ is
@@ -564,16 +566,21 @@ e^{0.05\, \mathrm{slope}_f} \cdot (1 + 0.1\, \mathrm{wind}_f),
 \label{eq:ros}
 \end{equation}
 with land cover class from ESA WorldCover 10 m \citep{worldcover},
-slope in degrees from SRTM 30 m \citep{srtm} by Horn's method
-\citep{horn1981}, and wind in meters per second from NASA POWER
+slope in degrees from SRTM 30 m \citep{srtm,farr2007} by Horn's
+finite-difference method \citep{tang2011}, and wind in meters per
+second from NASA POWER
 \citep{nasapower} at each fire's location and date. The relative rates
-$r_{\mathrm{class}}$ are ordinally grounded in the fire behavior fuel
-models of \citet{anderson1982}, grass fastest, shrub intermediate,
-timber slower, non-burnable near zero; their absolute magnitude has no
+$r_{\mathrm{class}}$ are ordinally grounded in the standard fire
+behavior fuel models of \citet{scott2005}, grass fastest, shrub
+intermediate and strongly load-dependent, timber litter slower,
+non-burnable classes spreading none; their absolute magnitude has no
 Colombian calibration source, so the overall scale
-$\rho_{\mathrm{scale}}$ is a swept sensitivity parameter, and the
-exponential slope response follows \citet{rothermel1972} in form with
-an illustrative coefficient. The value at risk $D_f$ is the WorldPop
+$\rho_{\mathrm{scale}}$ is a swept sensitivity parameter. The
+exponential slope response follows the exponential slope corrections
+of the Australian McArthur-type models, as reviewed by
+\citet{sharples2008}, with an illustrative coefficient; the slope
+factor in Rothermel's own model is instead a tangent-squared form
+\citep{andrews2018}. The value at risk $D_f$ is the WorldPop
 2020 constrained population count \citep{worldpop} within 1 km of the
 fire, an unmonetized exposure index cross-checked at municipal level
 against the 2018 census \citep{dane2018}.
@@ -656,7 +663,7 @@ solve the full problem with a fix-and-optimize matheuristic
 \citep{helber2010}, an improvement scheme based on mixed-integer
 programming (MIP) and distinct from local
 branching \citep{fischetti2003}, with large neighborhood search
-\citep{shaw1998} over the first-stage variables.
+\citep{pisinger2010} over the first-stage variables.
 
 The incumbent is a first-stage solution $(y, w, n)$. Each iteration
 selects a neighborhood of candidate sites to free, builds a reduced
@@ -670,8 +677,9 @@ binary fixed at zero. Every accepted iteration is therefore a verified
 improvement of the true objective, and the sub-MILP size is bounded by
 the neighborhood, not the catalog.
 
-Neighborhood selection follows Shaw's relatedness principle in
-geographic form: a random seed site anchors each iteration, and the
+Neighborhood selection follows Shaw's relatedness principle
+\citep{pisinger2010} in geographic form: a random seed site anchors
+each iteration, and the
 nearest candidate bases and water points to it are freed together,
 matching the problem's own coupling, since sites an aircraft would
 cycle between are exactly the sites worth reconsidering jointly. Pure
