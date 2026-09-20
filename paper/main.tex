@@ -192,8 +192,9 @@ airtankers for Ontario with an expected-cost model over historical
 demand. Modern strategic deployment models keep this base-side focus:
 \citet{skold2024} locate aerial firefighting resources in Sweden with a
 binary program over wildfire risk data, and \citet{mendes2023} place
-wildland fire suppression resources on a landscape with mixed-integer
-programming and iterated local search. Stochastic treatments deploy
+wildland fire suppression resources on a landscape with an iterated
+local search metaheuristic benchmarked against exact mixed-integer
+programming solutions. Stochastic treatments deploy
 suppression resources across existing stations under fire-occurrence
 uncertainty: the scenario-based standard-response models of
 \citet{haight2007}, the simulation plus stochastic integer programming
@@ -212,14 +213,13 @@ reservoirs by fire risk with geotechnological methods, and
 transport in Valpara{\'i}so. Operational models capture the refill
 cycle but take infrastructure as given: \citet{rodriguezveiga2018}
 assign aircraft to flight routes and refueling points during
-suppression, \citet{rodriguezbarreiro2024} plan helicopter circuits
+suppression, \citet{rodriguezbarreiro2026} plan helicopter circuits
 including water loading points for a given fire, and
 \citet{skorinkapov2024} schedule aerial resources against zone-assigned
 water loading points. Closest in scope, \citet{maras2023} site both
 heliports and water sources with GIS-based multi-objective programming,
-but in two separate sequential deterministic models with fixed
-response-time thresholds, without a refill cycle and without
-uncertainty.
+but in two separate deterministic models with fixed response-time
+thresholds, without a refill cycle and without uncertainty.
 
 Table~\ref{tab:gap} classifies this literature against the three
 conditions that jointly define the gap: (a) joint siting of bases and
@@ -232,8 +232,8 @@ and no work combines cycle-dependent productivity with strategic,
 uncertainty-aware siting. The proposed model is the only row satisfying
 all three, under stochastic programming with a mean-risk CVaR
 objective. The nearest works each own a single pillar:
-\citet{maras2023} site both facility types but sequentially,
-deterministically, and without a cycle; \citet{rodriguezbarreiro2024}
+\citet{maras2023} site both facility types but separately,
+deterministically, and without a cycle; \citet{rodriguezbarreiro2026}
 capture the cycle, and even select loading points, but operationally,
 with given infrastructure; and \citet{wei2015} are strategic and
 stochastic but site no water and use coverage rather than a refill
@@ -263,7 +263,7 @@ Reference & Bases & Water & Joint & Cyclic & Strategic & Uncertainty \\
 \midrule
 \citet{hodgson1978}                    & Yes     & No      & No & No  & Yes & No \\
 \citet{maclellan1996}\tnote{a}         & Yes     & No      & No & No  & Yes & No \\
-\citet{skold2024}\tnote{b}             & Yes     & No      & No & No  & Yes & No \\
+\citet{skold2024}\tnote{b}             & Partial & No      & No & No  & Yes & No \\
 \citet{haight2007}                     & Partial & No      & No & No  & Yes & SP \\
 \citet{ntaimo2013}                     & Partial & No      & No & No  & Yes & SP \\
 \citet{wei2015}                        & Partial & No      & No & No  & Yes & SP \\
@@ -272,7 +272,7 @@ Reference & Bases & Water & Joint & Cyclic & Strategic & Uncertainty \\
 \citet{ramalho2021}                    & No      & Yes     & No & No  & Yes & No \\
 \citet{ramalho2024}                    & No      & Yes     & No & No  & Yes & No \\
 \citet{rodriguezveiga2018}             & No      & Partial & No & Yes & No  & No \\
-\citet{rodriguezbarreiro2024}\tnote{c} & No      & Partial & No & Yes & No  & No \\
+\citet{rodriguezbarreiro2026}\tnote{c} & No      & Partial & No & Yes & No  & No \\
 \citet{skorinkapov2024}\tnote{d}       & No      & Partial & No & No  & No  & No \\
 \citet{maras2023}                      & Yes     & Yes     & No & No  & Yes & No \\
 \midrule
@@ -285,12 +285,17 @@ Reference & Bases & Water & Joint & Cyclic & Strategic & Uncertainty \\
 without recourse.
 \item[b] Conference paper, in the proceedings of the International
 Conference on Information Systems for Crisis Response and Management
-(ISCRAM).
-\item[c] arXiv preprint.
-\item[d] The Cyclic cell is confirmed only via a secondary paraphrase
-of the paywalled primary text (drop counts appear to be exogenous
-inputs); the remaining cells are confirmed against the openly available
-abstract.
+(ISCRAM). Positions repositionable aerial resources at existing
+municipal locations for a specific day, preparedness rather than
+infrastructure siting, hence Partial.
+\item[c] Published version of the arXiv preprint 2409.07937; the cell
+classification was verified on the arXiv full text.
+\item[d] The version of record is paywalled; the Cyclic and Water
+cells are confirmed from the full text of the companion master's
+thesis of the paper's second author (publicly available), which
+restates the same model with drop counts per time slot as exogenous
+inputs and water points predetermined; the remaining cells are
+confirmed against the openly available abstract.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
@@ -529,7 +534,8 @@ water refill points, in the national planimetric CRS (EPSG:9377).}
 
 Fire events come from NASA FIRMS Visible Infrared Imaging Radiometer
 Suite (VIIRS) 375 m active fire detections
-\citep{firms} for the full calendar year 2024 over a Cundinamarca
+\citep{firms,schroeder2014} for the full calendar year 2024 over a
+Cundinamarca
 bounding box: 4,719 raw detections reduce to 4,470 after coordinate
 validation, exact deduplication, and a nominal-confidence filter, and
 are clustered into 2,425 events with ST-DBSCAN \citep{birant2007},
@@ -1100,6 +1106,13 @@ the natural next step.
 experiment script, and the verification log of every decision and
 citation are available in the companion repository; raw data are
 redistributable open sources referenced above.
+
+\paragraph{Data acknowledgment.} We acknowledge the use of data from
+the NASA Fire Information for Resource Management System (FIRMS),
+part of the NASA Earth Science Data and Information System (ESDIS),
+and of wind data obtained from the NASA Langley Research Center
+Prediction of Worldwide Energy Resources (POWER) project, funded
+through the NASA Earth Science Division.
 
 % TODO(user): acknowledgments and funding, if any.
 
