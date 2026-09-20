@@ -15,6 +15,9 @@
 \usepackage{flafter}
 \usepackage[round]{natbib}
 \usepackage{url}
+\makeatletter
+\g@addto@macro{\UrlBreaks}{\do\-\do\_}
+\makeatother
 \usepackage[hidelinks]{hyperref}
 
 \graphicspath{{figures/}}
@@ -71,12 +74,22 @@ search; aerial wildfire suppression.
 \label{sec:intro}
 
 Colombia's eastern Andean department of Cundinamarca leads the
-country's historical record of reported forest fires, and the extreme
-January 2024 fire episode around Bogot{\'a} placed aerial suppression
-at the center of national policy. In response, the Colombian Aerospace
-Force (FAC), with the national disaster risk management unit (UNGRD),
-committed 150{,}000 millones COP to acquire two Sikorsky S-70i Firehawk
-helicopters, the first of their class in Latin America \citep{fac2026}. A country buying firefighting aircraft faces
+country's historical record of reported forest fires, with 7,908
+events reported to the national risk management databases between
+1921 and April 2020, nearly twice those of the second-ranked
+department \citep{ungrdnd}. The extreme fire episode of January 2024
+around Bogot{\'a} prompted the declaration of a national disaster
+\citep{decreto2024}, and aerial means carried the weight of the
+emergency response, more than 755 flight hours and 2,170 water
+discharges by late February \citep{ungrd2024}. In its wake, the
+Colombian Aerospace Force (FAC, Fuerza Aeroespacial Colombiana) and
+the National Unit for Disaster Risk Management (UNGRD, Unidad
+Nacional para la Gesti{\'o}n del Riesgo de Desastres) committed 150
+billion Colombian pesos (COP, with billion denoting $10^9$
+throughout) to acquire two Sikorsky S-70 Firehawk helicopters
+\citep{fac2025}, reported as the first of their class in Latin
+America \citep{infodefensa2025}. A country buying firefighting
+aircraft faces
 an immediate strategic question that current models do not answer:
 where should the supporting bases and, critically, the water refill
 points be located, and how should a single budget be split among bases,
@@ -572,12 +585,14 @@ The 120 candidate bases combine the national civil aerodrome index
 water points combine named OpenStreetMap water bodies \citep{osm} with
 the lagoon layer of the regional water authority (Corporaci{\'o}n
 Aut{\'o}noma Regional de Cundinamarca, CAR) \citep{car2026}. The
-aircraft is the Sikorsky S-70i Firehawk that Colombia is acquiring
-\citep{fac2026}: 75{,}000 millones COP per unit (the program price of
-150{,}000 millones for two), a 1{,}000 gallon (3{,}785 liter) tank,
-snorkel refill in under one minute from water at least 45 cm deep,
-which is what makes lagoon-scale water points usable, and a 150 knot
-cruise (277.8 km per hour). The per-cycle overhead $\delta$ is the
+aircraft is the Sikorsky S-70 Firehawk that Colombia is acquiring
+\citep{fac2025}: 75 billion COP per unit (the program price of 150
+billion for two), a 1{,}000 gallon (3{,}785 liter) tank with snorkel
+refill in under one minute \citep{lockheedfirehawk} from water at
+least 45 cm deep, which is what makes lagoon-scale water points
+usable, and a nominal 150 knot cruise (277.8 km per hour), the figure
+most consistently reported by secondary sources, since the
+manufacturer publishes no cruise speed. The per-cycle overhead $\delta$ is the
 sourced sub-minute refill plus an assumed 30 second drop and
 positioning allowance.
 
@@ -603,7 +618,7 @@ Citations for each source appear in the accompanying text.}
 \toprule
 Parameter & Base case & Provenance & Sensitivity \\
 \midrule
-Budget $B$ & 150{,}000 M COP & real Firehawk program spend & swept 80 to 300 G \\
+Budget $B$ & 150 G COP & real Firehawk program spend & swept 80 to 300 G \\
 Window $W$ & 2.0 h & NWCG initial attack standard & swept 1, 2, 4, 8 h \\
 CVaR level $\alpha$ & 0.95 & standard in the CVaR literature & exp.\ 4 varies risk \\
 Risk weight $\lambda$ & 0.5 & midpoint convention & swept 0 to 1 \\
@@ -617,10 +632,11 @@ $c^{\mathrm{wat}}_k$ (uniform) & 50 M COP & US benchmarks, scaled & swept 15 to 
 \end{tabular}
 \begin{tablenotes}[flushleft]
 \footnotesize
-\item M denotes millones (millions); G denotes thousands of millones
-($10^9$ COP). Agency initial-attack standards genuinely differ, from
-two-hour containment \citep{nwcg2026} to next-morning control
-\citep{korkola2024}, hence the window sweep.
+\item M denotes millions of COP ($10^6$); G denotes billions of COP
+($10^9$). NWCG is the National Wildfire Coordinating Group. Agency
+initial-attack standards genuinely differ, from two-hour containment
+\citep{nwcg2026} to next-morning control \citep{korkola2024}, hence
+the window sweep.
 \item[a] The $A_0$ range runs from the NWCG size class A bound (0.1
 ha), through a size class B fire at the base case (1 ha), up to the
 area of a single VIIRS 375 m pixel (14 ha), the sensor's localization
@@ -1009,8 +1025,8 @@ percent of the requirement (30,283 liters delivered against a 30,000
 liter requirement on the tightest day): the water-cycle coupling is
 the binding margin of every single containment, not a theoretical
 nicety. The worst scenario in the CVaR tail is the real day of 15
-January 2024, eighteen simultaneous fires, the very episode that
-motivated the Firehawk program.
+January 2024, eighteen simultaneous fires, the very episode in whose
+wake the Firehawk acquisition was announced.
 
 Three operational readings follow, stated with the caveat that
 several bases tie as alternate optima (Cerritos, Colombaima, and
