@@ -1,0 +1,58 @@
+% Main contributions statement for the ITOR submission form.
+% Same house style as main.tex: no em or en dashes anywhere.
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=2.8cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{enumitem}
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+
+\begin{document}
+
+\begin{center}
+{\large\bfseries Main Contributions}\\[0.6em]
+The Cycle-Constrained Aerial Suppression Base and Water Point
+Location Problem:\\ Joint Siting under Uncertainty with an Application
+to Cundinamarca, Colombia\\[0.4em]
+Jaime Enrique Pesca Santos and Kiana Hikaru Ysa Morla
+\end{center}
+
+\vspace{0.8em}
+
+\begin{enumerate}[leftmargin=1.6em,itemsep=0.7em]
+
+\item We introduce the cycle-constrained aerial suppression base and
+water point location problem, to our knowledge the first model that
+sites aerial bases and water refill points jointly, with aircraft
+productivity endogenous to the base to fire to water refill cycle
+rather than to base-to-fire distance alone.
+
+\item Containment is modeled physically, liters delivered against a
+fire growth requirement, so the two-stage stochastic program with a
+mean-risk conditional value-at-risk (CVaR) objective needs no
+historical suppression outcome data, which do not exist for Colombia,
+and its only nonlinearity admits an exact McCormick linearization.
+
+\item A fix-and-optimize matheuristic whose reduced subproblems are
+exact by construction solves the full 5,449-point water catalog, a
+scale at which the direct model cannot even be built, with a random
+destroy operator that provably escapes the local optima of purely
+geographic neighborhoods.
+
+\item The case study is built entirely from open, verified sources
+around Colombia's real Firehawk acquisition, from satellite fire
+detections to sample average approximation scenarios with a
+statistical optimality gap of 3.4 percent, and is fully replicable
+from the companion repository.
+
+\item The computational study yields policy-relevant structure:
+deployment is fleet-limited before it is physics-limited, sequential
+bases-first planning matches the integrated optimum in every
+certifiable regime, and the stable half of the optimal plan is a
+short, nearly free list of named water points, actionable before any
+aircraft arrives.
+
+\end{enumerate}
+
+\end{document}
