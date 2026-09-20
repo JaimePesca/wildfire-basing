@@ -45,9 +45,10 @@ fire-to-water refill leg on every drop, so water point location, not
 base-to-fire distance alone, drives delivered water. We introduce the
 cycle-constrained aerial suppression base and water point location
 problem, the first to site bases and water refill points jointly with
-cycle-endogenous productivity, as a two-stage mean-risk (CVaR)
-stochastic program with an exact linearization and a fix-and-optimize
-matheuristic whose reduced subproblems are exact. An open-data case
+cycle-endogenous productivity, as a two-stage stochastic program with
+a mean-risk objective based on conditional value-at-risk (CVaR), an
+exact linearization, and a fix-and-optimize matheuristic whose reduced
+subproblems are exact. An open-data case
 study for Cundinamarca, Colombia, built around the country's Firehawk
 acquisition, shows a fleet-limited-first, physics-limited-second
 regime: budget dominates, uncalibrated growth constants act as a
@@ -99,13 +100,14 @@ problem as a two-stage stochastic program: first-stage decisions open
 bases, station aircraft, and enable water points under a single budget;
 second-stage recourse dispatches aircraft to fires scenario by
 scenario. The objective is a mean-risk convex combination of expected
-loss and conditional value-at-risk \citep{rockafellar2000}. Fire
+loss and conditional value-at-risk (CVaR) \citep{rockafellar2000}. Fire
 containment is physical: a fire is contained if the liters delivered
 within a critical window exceed a requirement that grows with arrival
 time and rate of spread, so no historical suppression outcome data,
 which do not exist for Colombia, are needed. The only nonlinearity, a
 bilinear product of dispatch and refill assignment, admits an exact
-McCormick linearization.
+McCormick linearization, yielding a mixed-integer linear program
+(MILP).
 
 Second, we develop a fix-and-optimize matheuristic
 \citep{helber2010} with large neighborhood search \citep{shaw1998}
@@ -119,9 +121,14 @@ sub-problem keeps the full scenario set, so every accepted move is a
 verified improvement for the true problem.
 
 Third, we construct a fully sourced, replicable case study for
-Cundinamarca from open data only: NASA FIRMS satellite detections for
-all of 2024, clustered into events with ST-DBSCAN \citep{birant2007};
-land cover, slope, and wind from ESA WorldCover, SRTM, and NASA POWER;
+Cundinamarca from open data only: satellite fire detections for all of
+2024 from the Fire Information for Resource Management System (FIRMS)
+of the National Aeronautics and Space Administration (NASA), clustered
+into events with spatio-temporal density-based spatial clustering of
+applications with noise (ST-DBSCAN) \citep{birant2007}; land cover,
+slope, and wind from European Space Agency (ESA) WorldCover, the
+Shuttle Radar Topography Mission (SRTM), and NASA Prediction of
+Worldwide Energy Resources (POWER);
 population exposure from WorldPop, cross-checked against the Colombian
 census; 120 candidate bases from the national aerodrome index and
 5,449 candidate water points from OpenStreetMap and the regional water
@@ -256,7 +263,9 @@ Reference & Bases & Water & Joint & Cyclic & Strategic & Uncertainty \\
 \footnotesize
 \item[a] Minimizes expected cost over multi-season historical demand,
 without recourse.
-\item[b] Conference paper (ISCRAM proceedings).
+\item[b] Conference paper, in the proceedings of the International
+Conference on Information Systems for Crisis Response and Management
+(ISCRAM).
 \item[c] arXiv preprint.
 \item[d] The Cyclic cell is confirmed only via a secondary paraphrase
 of the paywalled primary text (drop counts appear to be exogenous
@@ -283,8 +292,10 @@ requirement is contained; otherwise it escapes and its exposed
 population counts as loss.
 
 Table~\ref{tab:notation} summarizes the notation.
-Distances are in meters in the national planimetric CRS (EPSG:9377),
-time is in hours, and money is in Colombian pesos (COP).
+Distances are in meters in the national planimetric coordinate
+reference system (CRS), registered as code 9377 in the European
+Petroleum Survey Group (EPSG) geodetic registry (EPSG:9377); time is
+in hours, and money is in Colombian pesos (COP).
 
 \begin{table}[t]
 \centering
@@ -298,7 +309,7 @@ scenario: a bare $f$ means for $f \in F_s$ within scenario $s$.}
 $I$ & candidate aerial base sites, index $i$ \\
 $K$ & candidate water refill points, index $k$ \\
 $M$ & aircraft types, index $m$ (a single type in this study) \\
-$S$ & SAA scenario sample, index $s$, probability $p_s$ \\
+$S$ & scenario sample, index $s$, probability $p_s$ \\
 $F_s$ & fires in scenario $s$, index $f$ \\
 \midrule
 \multicolumn{2}{l}{\emph{Parameters}} \\
@@ -461,8 +472,9 @@ because it silently arises when subsampling scenario sets without
 renormalizing.
 
 Section~\ref{sec:exp1} verifies computationally that the linearized
-model and the literal bilinear program solved with a nonconvex MIQCP
-solver return identical optimal values on real instances. The
+model and the literal bilinear program solved as a nonconvex
+mixed-integer quadratically constrained program (MIQCP) return
+identical optimal values on real instances. The
 auxiliary count $|I| \times |K|$ per fire and scenario is what makes
 the full 5,449-point water catalog intractable for the direct MILP and
 motivates the matheuristic of Section~\ref{sec:method}.
@@ -492,7 +504,8 @@ water refill points, in the national planimetric CRS (EPSG:9377).}
 
 \subsection{Fire events and scenarios}
 
-Fire events come from NASA FIRMS VIIRS 375 m active fire detections
+Fire events come from NASA FIRMS Visible Infrared Imaging Radiometer
+Suite (VIIRS) 375 m active fire detections
 \citep{firms} for the full calendar year 2024 over a Cundinamarca
 bounding box: 4,719 raw detections reduce to 4,470 after coordinate
 validation, exact deduplication, and a nominal-confidence filter, and
@@ -512,7 +525,7 @@ A scenario is one historical calendar day, matching the stochastic
 unit of \citet{wei2015}: the 366-day pool of 2024 (282 days with at
 least one event) is bootstrap-resampled with replacement into $|S| =
 200$ equiprobable day scenarios under sample average approximation
-\citep{kleywegt2001}. Day scenarios keep the episode structure of
+(SAA) \citep{kleywegt2001}. Day scenarios keep the episode structure of
 constraint \eqref{eq:fleet} valid and assume fleet availability resets
 daily; cross-day dynamics are not modeled. The satellite record misses
 cloud-obscured fires and detects active burning rather than ignition,
@@ -547,7 +560,8 @@ against the 2018 census \citep{dane2018}.
 The 120 candidate bases combine the national civil aerodrome index
 \citep{aerocivil2025} with military installations; the 5,449 candidate
 water points combine named OpenStreetMap water bodies \citep{osm} with
-the regional water authority's lagoon layer \citep{car2026}. The
+the lagoon layer of the regional water authority (Corporaci{\'o}n
+Aut{\'o}noma Regional de Cundinamarca, CAR) \citep{car2026}. The
 aircraft is the Sikorsky S-70i Firehawk that Colombia is acquiring
 \citep{fac2026}: 75{,}000 millones COP per unit (the program price of
 150{,}000 millones for two), a 1{,}000 gallon (3{,}785 liter) tank,
@@ -613,7 +627,8 @@ The direct MILP is tractable only for truncated candidate sets: the
 linearization adds $|I| \times |K|$ auxiliaries per fire and scenario,
 over 650{,}000 per fire-scenario pair at the full catalog. We therefore
 solve the full problem with a fix-and-optimize matheuristic
-\citep{helber2010}, a MIP-based improvement scheme distinct from local
+\citep{helber2010}, an improvement scheme based on mixed-integer
+programming (MIP) and distinct from local
 branching \citep{fischetti2003}, with large neighborhood search
 \citep{shaw1998} over the first-stage variables.
 
