@@ -132,9 +132,12 @@ Worldwide Energy Resources (POWER);
 population exposure from WorldPop, cross-checked against the Colombian
 census; 120 candidate bases from the national aerodrome index and
 5,449 candidate water points from OpenStreetMap and the regional water
-authority; and the real Firehawk's cost, tank, and speed. Every
-parameter is either traced to a verified source or explicitly declared
-an assumption and swept in the sensitivity analysis.
+authority; and the real Firehawk's cost, tank capacity, and cruise
+speed. Aircraft parameters are taken from the manufacturer's
+specification and the acquisition program's published figures;
+parameters that lack a calibrated Colombian source enter as explicit,
+disclosed assumptions and are explored over ranges in the sensitivity
+analysis.
 
 Fourth, our computational study yields policy-relevant structural
 findings rather than only benchmark numbers. Under the real program
@@ -153,14 +156,16 @@ tractability exactly where the integrated question becomes
 interesting, in multi-aircraft, high-budget-slack regimes, which is
 what motivates the matheuristic.
 
-The remainder of the paper is organized as follows.
-Section~\ref{sec:lit} reviews the literature and states the gap.
-Section~\ref{sec:model} formulates the model.
-Section~\ref{sec:data} describes the Cundinamarca case study data.
-Section~\ref{sec:method} presents the matheuristic.
-Section~\ref{sec:experiments} reports the computational study, and
-Section~\ref{sec:conclusions} concludes with limitations and ongoing
-work.
+The paper moves from the gap to the policy reading.
+Section~\ref{sec:lit} locates the three conditions no existing model
+meets jointly, which the formulation of Section~\ref{sec:model} is
+then built to satisfy; Section~\ref{sec:data} assembles the open-data
+Cundinamarca instance on which the model is solved;
+Section~\ref{sec:method} develops the matheuristic that carries the
+model beyond the direct solver's reach; Section~\ref{sec:experiments}
+derives the structural findings above from the computational study;
+and Section~\ref{sec:conclusions} closes with the limitations and the
+questions the results leave open.
 
 \section{Related work and gap}
 \label{sec:lit}
@@ -1023,7 +1028,7 @@ attack sizes above five hectares nothing is containable, so the
 value of the acquisition rides on detection-to-dispatch speed as
 much as on where anything is sited.
 
-\section{Conclusions, limitations, and ongoing work}
+\section{Conclusions, limitations, and future research}
 \label{sec:conclusions}
 
 We introduced the first model that jointly sites aerial suppression
