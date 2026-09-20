@@ -1,32 +1,41 @@
-Dear Guest Editors,
+Dear Professors Alvelos, Carrasco Barra, Constantino, and Wei,
 
-Please consider our manuscript "The Cycle-Constrained Aerial
+We are pleased to submit our manuscript "The Cycle-Constrained Aerial
 Suppression Base and Water Point Location Problem: Joint Siting under
-Uncertainty with an Application to Cundinamarca, Colombia" for the
-International Transactions in Operational Research special issue on
-Operations Research in Wildfire Management.
+Uncertainty with an Application to Cundinamarca, Colombia" to the
+International Transactions in Operational Research. As requested in
+the call for papers, we indicate that this submission is intended for
+the special issue on Operations Research in Wildfire Management.
 
-The paper addresses two of the special issue's listed topics, resource
-location-allocation in wildfire preparedness and combined problems, by
-introducing, to our knowledge, the first model that sites aerial
+The paper sits squarely within the call's scope, in particular the
+listed topics of resource location-allocation in wildfire
+preparedness, combined problems, budgeting, and suppression resource
+operations, approached with stochastic programming and matheuristics.
+It introduces, to our knowledge, the first model that sites aerial
 suppression bases and water refill points jointly, with aircraft
-productivity endogenous to the base-fire-water refill cycle, as a
-two-stage mean-risk (CVaR) stochastic program. A fix-and-optimize
-matheuristic with provably exact reduced subproblems makes the full
-candidate catalog tractable, and a fully open-data case study for
-Cundinamarca, Colombia, is built around the country's real Sikorsky
-S-70i Firehawk acquisition, including an SAA replication analysis with
-an optimality-gap estimate and an operational reading of the plan in
-real places.
+productivity endogenous to the base to fire to water refill cycle, as
+a two-stage mean-risk stochastic program based on conditional
+value-at-risk (CVaR); a single budget covering bases, aircraft, and
+water infrastructure makes the budget split endogenous. An exact
+linearization and a fix-and-optimize matheuristic with provably exact
+reduced subproblems make the full candidate catalog tractable. A
+fully open-data, replicable case study for Cundinamarca, Colombia, is
+built around the country's real Sikorsky S-70 Firehawk acquisition
+and includes a sample average approximation replication analysis with
+an optimality-gap estimate and an operational reading of the optimal
+plan in real places, yielding policy-relevant structural findings on
+when sequential planning suffices and on what limits containment.
 
 The manuscript is original, unpublished, and not under consideration
-elsewhere. All data sources are open and every experiment is
-reproducible from the companion repository, which we will make
-available to reviewers.
+elsewhere. The research received no external funding and the authors
+declare no competing interests. All data sources are open and every
+experiment is reproducible from the companion repository, available
+to reviewers upon request.
 
 Sincerely,
 
-Jaime Enrique Pesca Santos (corresponding author, jaime.pesca@uexternado.edu.co)
+Jaime Enrique Pesca Santos (corresponding author,
+jaime.pesca@uexternado.edu.co)
 Facultad de Administracion de Empresas, Universidad Externado de
 Colombia, Bogota, Colombia
 
